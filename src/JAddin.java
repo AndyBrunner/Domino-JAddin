@@ -17,7 +17,7 @@ import lotus.notes.internal.MessageQueue;
  */
 public final class JAddin extends JavaServerAddin {
 	
-	static	String			JADDIN_VERSION		= "1.2.1";			// TODO
+	static	String			JADDIN_VERSION		= "1.3.0";			// TODO
 	
 	// Instance variables
 	private JAddinThread	xJAddinThread		= null;
