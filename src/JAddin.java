@@ -11,7 +11,7 @@ import lotus.notes.internal.MessageQueue;
  * message queue.
  * 
  * @author	ABData, Andy Brunner
- * @version	1.2.1 - 03/May/2014
+ * @version	1.3.0 - 24/Mar/2015
  * 
  * @see		<a href="http://abdata.ch/JAddin.html">Homepage of JAddin</a>
  */

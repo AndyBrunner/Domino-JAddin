@@ -2,6 +2,7 @@ import lotus.domino.NotesFactory;
 import lotus.domino.NotesException;
 import lotus.domino.NotesThread;
 import lotus.domino.Session;
+import lotus.domino.Base;
 
 /**
  *	This abstract class is started as an separate thread by the JAddin. It establishes the JAddin user framework and calls the
@@ -302,23 +303,12 @@ public abstract class JAddinThread extends NotesThread {
 			logMessage("ERROR - Unable to send the message: " + e.text);
 			return false;
 		} finally {
-			// Free the objects
-			try {
-				if (notesDateTime != null)
-					notesDateTime.recycle();
-				
-				if (notesRTItem != null)
-					notesRTItem.recycle();
-			
-				if (notesDocument != null)
-					notesDocument.recycle();
-			
-				if (notesDatabase != null)
-					notesDatabase.recycle();
-			} catch (NotesException e) {
-				logMessage("ERROR - Unable to free the Domino resources: " + e.text);
-				return false;
-			}
+			// Free the Domino objects
+			recycleObjects(notesDateTime, notesRTItem, notesDocument, notesDatabase);
+			notesDateTime	= null;
+			notesRTItem		= null;
+			notesDocument	= null;
+			notesDatabase	= null;			
 		}
 		
 		logDebug("Message successfully created in <mail.box>");
@@ -351,10 +341,31 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
+	 * Recyle (free) Domino object(s)
+	 * 
+	 * @param	xObjects... Domino object(s) to be recycled
+	 */
+	public void recycleObjects(Object... xObjects) {
+	
+		// Call the recycle() method for each passed Domino object
+		for (Object xObject : xObjects) {
+			if (xObject != null) {
+				if (xObject instanceof Base) {
+					try {
+						((Base) xObject).recycle();
+						} catch (NotesException e) {
+							logMessage("ERROR - Unable to recycle Domino object: " + e.text);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Return state of JAddin
 	 * 
 	 * @return 	Indicator
-	 * 	 */
+	 */
 	final private boolean isJAddinAlive() {
 		
 		if (xJAddin == null)
@@ -386,18 +397,13 @@ public abstract class JAddinThread extends NotesThread {
 			xJAddin.sendQuitCommand();
 		}
 		
-		try {
-			logDebug("Freeing the Domino resources");
+		logDebug("Freeing the Domino resources");
 			
-			// Free session object
-			if (xDominoSession != null) {
-				xDominoSession.recycle();
-				xDominoSession = null;
-			}
-		} catch (NotesException e) {
-			logMessage("ERROR - Cleanup processing failed: " + e.text);
-		}
+		// Free session object
+		recycleObjects(xDominoSession);
+		xDominoSession = null;
 		
 		xCleanupDone = true;
 	}
+	
 }
