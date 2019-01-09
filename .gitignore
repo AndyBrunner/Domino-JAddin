@@ -1,4 +1,8 @@
-/bin/
-/doc/
-/.project
-/.DS_Store
+.settings/
+.classpath
+.DS_Store
+.project
+JAddin-Manual.docx
+bin/
+src/
+doc/
