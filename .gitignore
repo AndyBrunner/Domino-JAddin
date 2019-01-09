@@ -1,7 +1,7 @@
-.settings/
 .classpath
-.DS_Store
 .project
+.settings/
+.DS_Store
 JAddin-Manual.docx
 bin/
 src/
