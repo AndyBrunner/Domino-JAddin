@@ -9,7 +9,7 @@
 - Complete rewrite of the documentation and publish it on GitHub
 - Create homepage on GitHub
 
-**Version 1.3.0 24-Mar-2015**
+**Version 1.3.0 24-Mar-2015 (Beta test only)**
 - Change: Replace the Thread termination sequence by Thread.interrupt()
 - Change: Mark addInTerminate() as deprecated
 - Change: Small change in sendMessage() for processing sender name
