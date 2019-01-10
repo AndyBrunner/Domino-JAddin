@@ -1,4 +1,4 @@
-[Homepage](README.md) | [Download](DOWNLOAD.md) | [Version History](HISTORY.md) 
+[Homepage](README.md) | [API Documentation](api/index.html) | [Download](DOWNLOAD.md) | [Release History](HISTORY.md) 
 
 Java Toolkit for IBM Domino server add-in
 
