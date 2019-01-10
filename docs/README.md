@@ -6,7 +6,7 @@
 
 Do you need to write an add-in for IBM Domino server in Java?
 
-This JAddin framework is a very thin and convenient layer between the Domino RunJava task and your Java application code. It greatly helps you to create Java server tasks by freeing you to learn all the Domino add-in specifics such as message queue handling, thread creation, communicating with the console, resource cleanup, etc. It is written entirely in Java to support all Domino versions and platforms.
+The JAddin framework is a very thin and convenient layer between the Domino RunJava task and your Java application code. It greatly helps you to create Java server tasks by freeing you to learn all the Domino add-in specifics such as message queue handling, thread creation, communicating with the console, resource cleanup, etc. It is written entirely in Java to support all Domino versions and platforms.
 
 ### Installation
 

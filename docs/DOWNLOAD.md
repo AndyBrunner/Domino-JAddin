@@ -2,4 +2,6 @@
 
 ### Download
 
-Sorry, the new download package is not yet available. Come back again soon ...
+- Version 2.0.0 (Not released yet)
+- Version 1.3.0 (Not released yet)
+- [Version 1.2.0](JAddin-1.2.0.zip)
