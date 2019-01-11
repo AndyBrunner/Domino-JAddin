@@ -2,14 +2,14 @@
 
 ### Release History
 
-**Version 2.0.0 (Work in progress)**
+**Version 2.0.0 ??-Jan-2019 (Planned 01/2019)**
 
 - Major rewrite of JAddin.java and JAddinThread
 - Now requires JVM 1.8+ (Domino 9.0.1 FP8+)
 - Complete rewrite of the documentation and publish it on GitHub
 - Create homepage on GitHub
 
-**Version 1.3.0 24-Mar-2015 (Beta test only)**
+**Version 1.3.0 24-Mar-2015 (Beta test user only)**
 - Change: Replace the Thread termination sequence by Thread.interrupt()
 - Change: Mark addInTerminate() as deprecated
 - Change: Small change in sendMessage() for processing sender name
