@@ -71,10 +71,9 @@ Help! | Displays this help text
 
 This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my [email address](mailto:andy.brunner@k43.ch).
 
-## Unlicense (see [unlicense.org](http://unlicense.org))
+### Unlicense (see [unlicense.org](http://unlicense.org))
 
 _This software shall be used for Good, not Evil._
 
 *Created with love and passion in the beautiful country of Switzerland. As far as I know, no animal was harmed in the making of this program.*
 
----
