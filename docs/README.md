@@ -15,23 +15,23 @@ The JAddin framework is a very thin and convenient layer between the Domino RunJ
 ### Installation
 
 - The framework consists of the two Java class files JAddin.class and JAddinThread.class. To install the framework (and your application) you need to copy all necessary Java class files to the program directory on Windows or to the data directory on Linux.
-- Alternatively you can combine all class files in one JAR container and add this JAR file name to the Domino Notes.Ini parameter, e.g. `JavaUserClasses=C:\Lotus\Domino\traveler.jar;C:\Apps\<AddinName>.jar`
+- Alternatively you can combine all class files in one JAR container and add this JAR file name to the Domino Notes.Ini parameter, e.g. `JavaUserClasses=C:\Lotus\Domino\traveler.jar;C:\Apps\AddinName.jar`
 - If you update any Java class file on the Domino server, you first need to stop the RunJava Domino task to free the class cache used by RunJava.
 
 ### Starting the Application
 
 There are several ways to start the application:
 
-- Manually by entering the command in the Domino console, e.g. `Load RunJava JAddin <AddinName>`
-- Adding RunJava in the Domino server Notes.Ini, e.g. `ServerTasks=Replica,Router,Update,RunJava JAddin <AddinName>,AMgr`
+- Manually by entering the command in the Domino console, e.g. `Load RunJava JAddin AddinName`
+- Adding RunJava in the Domino server Notes.Ini, e.g. `ServerTasks=Replica,Router,Update,RunJava JAddin AddinName,AMgr`
 - Creating a program document in the Domino Directory:
 
 Program name: | "RunJava"
-Command line:  | "JAddin <AddinName>"
-Server to run on: | <Your Server Name>, e.g. "Server/ACME"
+Command line:  | "JAddin AddinName"
+Server to run on: | Your Server Name, e.g. "Server/ACME"
 Enabled/disabled: | At server startup only
 
-The JAddin may be started with the special parameter «Debug!» to activate the debugging during startup, e.g. `Load RunJava JAddin <AddinName> Debug!`
+The JAddin may be started with the special parameter «Debug!» to activate the debugging during startup, e.g. `Load RunJava JAddin AddinName Debug!`
 
 ### Console Commands
 
@@ -44,7 +44,7 @@ Memory! | Display the Java virtual machine memory usage
 GC! | Executes the Java virtual machine garbage collector
 Debug! | Enable the debug logging to the console
 NoDebug!	 | Disable the debug logging to the console
-HeartBeat! | Manually tart heartbeat processing (automatically done exery 15 seconds)
+HeartBeat! | Manually start heartbeat processing (automatically done every 15 seconds)
 Help! | Displays this help text
 
 ### Frequently Asked Questions
@@ -55,11 +55,11 @@ Help! | Displays this help text
 - Q: During startup, I see the error message `RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/JAddIn in the classpath. Class names are case-sensitive.`
 - A: Make sure that the class names in the "Load RunJava" are entered with exact upper and lower case.
 
-- Q: During startup, I see the error message `JAddin: Error: Unable to load the Java class <AddinName>.`
-- A: The JAddin framework tried to load the Java class <AddinName> but the specified name could not be found. Make sure that the class file <AddinName>.class is found in the Domino program directory (Windows) or in the Domino data directory (Linux).
+- Q: During startup, I see the error message `JAddin: Error: Unable to load the Java class AddinName.`
+- A: The JAddin framework tried to load the Java class AddinName but the specified name could not be found. Make sure that the class file AddinName.class is found in the Domino program directory (Windows) or in the Domino data directory (Linux).
 
-- Q: During startup, I see the error message `RunJava: Can't find stopAddin method for class <AddinName>.`
-- A: Make sure you start your add-in thru JAddin with the command `Tell RunJava JAddin <AddinName>` and not directly thru RunJava.
+- Q: During startup, I see the error message `RunJava: Can't find stopAddin method for class AddinName.`
+- A: Make sure you start your add-in thru JAddin with the command `Tell RunJava JAddin AddinName` and not directly thru RunJava.
 
 - Q: I see out-of-memory errors in Java while executing my add-in.
 - A: All Java add-ins execute in a single JVM under the control of RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
