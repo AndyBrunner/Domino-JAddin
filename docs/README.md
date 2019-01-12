@@ -26,7 +26,7 @@ public class HelloWorld extends JAddinThread {
 	// This is the main entry point. When this method returns, the add-in terminates.
 	public void addinStart() {
 		
-		logMessage("Started with parameters <" + getAddinParameters() + '>');
+		logMessage("Started with parameters " + getAddinParameters());
 		
 		try {
 			logMessage("Running on " + dbGetSession().getNotesVersion());
@@ -57,7 +57,33 @@ public class HelloWorld extends JAddinThread {
 }
 ```
 
-### Starting the Application
+### Create Application JAR File
+
+To distribute your add-in with the JAddin framework, you can build a single JAR with all the required Java code.
+
+#### Build the JAR File
+
+1. Create a MANIFEST.MF file
+
+Make sure the file MANIFEST.MF includes an empty line at the bottom.
+
+```text
+Manifest-Version: 1.0
+Class-Path: .
+Main-Class: Your-Add-in-name
+```
+
+1. Create the JAR container
+
+There are many tools available to create a JAR container, but the easiest way is to use the command line.
+
+`jar cvmf MANIFEST.MF Your-Add-in-name.jar Your-Add-in-name.class JAddin.class JAddinThread.class`
+
+1. Installation
+
+Copy this JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java class to load.
+
+1. Run the add-in
 
 There are several ways to start the application:
 
