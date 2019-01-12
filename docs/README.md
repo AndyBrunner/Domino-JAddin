@@ -85,10 +85,7 @@ There are several ways to start the application:
 - Adding RunJava in the Domino server Notes.Ini, e.g. `ServerTasks=Replica,Router,Update,RunJava JAddin AddinName,AMgr`
 - Creating a program document in the Domino Directory:
 
-Program name: | "RunJava"
-Command line:  | "JAddin AddinName"
-Server to run on: | Your Server Name, e.g. "Server/ACME"
-Enabled/disabled: | At server startup only
+![Program Document](JAddin-Program-Document.png)
 
 ### Console Commands
 
