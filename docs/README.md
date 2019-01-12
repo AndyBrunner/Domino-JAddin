@@ -75,5 +75,7 @@ This framework was created to help implementing projects which required the use 
 
 _This software shall be used for Good, not Evil._
 
+***
+
 *Created with love and passion in the beautiful country of Switzerland. As far as I know, no animal was harmed in the making of this program.*
 
