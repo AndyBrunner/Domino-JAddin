@@ -92,17 +92,20 @@ Enabled/disabled: | At server startup only
 
 ### Console Commands
 
-The framework supports a number of special commands.
+The framework supports a number of special commands:
 
-**Command** | **Description**
-Version!	 | Display the JAddin, Java and OS version numbers
-Quit! | 	Terminate the add-in thru the JAddin framework
-Memory! | Display the Java virtual machine memory usage
-GC! | Executes the Java virtual machine garbage collector
-Debug! | Enable the debug logging to the console
-NoDebug!	 | Disable the debug logging to the console
-HeartBeat! | Manually start heartbeat processing (automatically done every 15 seconds)
-Help! | Displays this help text
+```text
+> Tell HelloWorld Help!
+12.01.2019 18:18:02   JAddin: The following JAddin commands are available:
+12.01.2019 18:18:02   JAddin: Version!    Display JAddin, Java and OS version numbers
+12.01.2019 18:18:02   JAddin: Quit!       Terminate the add-in thru the JAddin framework
+12.01.2019 18:18:02   JAddin: Memory!     Display the Java virtual machine memory usage
+12.01.2019 18:18:02   JAddin: GC!         Executes the Java virtual machine garbage collector
+12.01.2019 18:18:02   JAddin: Debug!      Enable the debug logging to the console
+12.01.2019 18:18:02   JAddin: NoDebug!    Disable the debug logging to the console
+12.01.2019 18:18:02   JAddin: Heartbeat!  Manually start heartbeat processing (automatically done every 15 seconds)
+12.01.2019 18:18:02   JAddin: Help!       Displays this help text
+```
 
 ### Debugging
 
@@ -153,11 +156,17 @@ The debug output is written to the Domino console and includes the name of the J
 - Q: During startup, I see the error message `RunJava: Can't find stopAddin method for class AddinName.`
 - A: The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
 
+- Q: During startup, I see the error message `RunJava JVM: java.lang.NoClassDefFoundError: Addinname (wrong name: AddinName)`
+- A: The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.
+
 - Q: I see out-of-memory errors in Java while executing my add-in.
 - A: All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
 
 - Q: What is the heartbeart in JAddin?
 - A: The main thread in JAddin gets triggered every 15 seconds to perform some internal housekeeping tasks. One of these checks makes sure that the Java heap space does not get filled up to avoid out-of-memory errors. If the free space falls below 10 percent, the Java virtual machine garbage collector is invoked and a message is written to the console.
+
+- Q: I have copied a new version of my add-in to the server, but it does not get active during application startup.
+- A: The RunJava task caches the Java classes in use. You must terminate all other RunJava tasks - and therefore terminate RunJava itself - to be able to force the reloading of your class file. 
 
 ### Author
 
