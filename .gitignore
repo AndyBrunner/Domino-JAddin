@@ -2,6 +2,5 @@
 .project
 .settings/
 .DS_Store
-JAddin-Manual.docx
 bin/
 src/
