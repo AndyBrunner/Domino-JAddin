@@ -2,5 +2,5 @@
 
 ### Download
 
-- Version 2.0.0 (Planned 01/2019)
+- Version 2.0.0 (JAddin-2.0.0.zip)
 - [Version 1.2.0](JAddin-1.2.0.zip)

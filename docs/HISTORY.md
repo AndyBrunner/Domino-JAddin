@@ -2,12 +2,14 @@
 
 ### Release History
 
-**Version 2.0.0 ??-Jan-2019 (Planned 01/2019)**
+**Version 2.0.0 xx-Jan-2019**
 
 - Major rewrite of JAddin.java and JAddinThread
 - Now requires JVM 1.8+ (Domino 9.0.1 FP8+)
+- Added many new methods (dbxxxx) to support Domino applications.
+- Added many new methods to support application development
 - Complete rewrite of the documentation and publish it on GitHub
-- Create homepage on GitHub
+- Create jaddin.abdata.ch homepage on GitHub
 
 **Version 1.3.0 24-Mar-2015 (Beta test user only)**
 - Change: Replace the Thread termination sequence by Thread.interrupt()
