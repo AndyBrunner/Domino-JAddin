@@ -57,7 +57,7 @@ To distribute your add-in with the JAddin framework, you can build a single JAR 
 
 #### Build the JAR File
 
-1. Create MANIFEST.MF file
+##### Create MANIFEST.MF file
 
 Make sure that the file includes an empty line at the bottom.
 
@@ -67,17 +67,17 @@ Class-Path: .
 Main-Class: AddinName
 ```
 
-2. Create JAR container
+##### Create JAR container
 
 There are many tools available to create JAR containers, but the easiest way is to use the command line.
 
 `jar cvmf MANIFEST.MF AddinName.jar AddinName.class JAddin.class JAddinThread.class`
 
-3. Install Application
+##### Install Application
 
 Copy this JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java class to load.
 
-4. Run application
+##### Run application
 
 There are several ways to start the application:
 
