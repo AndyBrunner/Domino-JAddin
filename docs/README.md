@@ -12,12 +12,6 @@ The JAddin framework is a very thin and convenient layer between the Domino RunJ
 
 - IBM Domino 9.0.1 FP8 or higher (JVM 1.8 requirement)
 
-### Installation
-
-- The framework consists of the two Java class files JAddin.class and JAddinThread.class. To install the framework (and your application) you need to copy all necessary Java class files to the program directory on Windows or to the data directory on Linux.
-- Alternatively you can combine all class files in one JAR container and add this JAR file name to the Domino Notes.Ini parameter, e.g. `JavaUserClasses=C:\Lotus\Domino\traveler.jar;C:\Apps\AddinName.jar`
-- If you update any Java class file on the Domino server, you first need to stop the RunJava Domino task to free the class cache used by RunJava.
-
 ### Example
 
 ```java
@@ -63,27 +57,27 @@ To distribute your add-in with the JAddin framework, you can build a single JAR 
 
 #### Build the JAR File
 
-1. Create a MANIFEST.MF file
+1. Create MANIFEST.MF file
 
-Make sure the file MANIFEST.MF includes an empty line at the bottom.
+Make sure that the file includes an empty line at the bottom.
 
 ```text
 Manifest-Version: 1.0
 Class-Path: .
-Main-Class: Your-Add-in-name
+Main-Class: AddinName
 ```
 
-1. Create the JAR container
+2. Create JAR container
 
-There are many tools available to create a JAR container, but the easiest way is to use the command line.
+There are many tools available to create JAR containers, but the easiest way is to use the command line.
 
-`jar cvmf MANIFEST.MF Your-Add-in-name.jar Your-Add-in-name.class JAddin.class JAddinThread.class`
+`jar cvmf MANIFEST.MF AddinName.jar AddinName.class JAddin.class JAddinThread.class`
 
-1. Installation
+3. Install Application
 
 Copy this JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java class to load.
 
-1. Run the add-in
+4. Run application
 
 There are several ways to start the application:
 
@@ -96,11 +90,9 @@ Command line:  | "JAddin AddinName"
 Server to run on: | Your Server Name, e.g. "Server/ACME"
 Enabled/disabled: | At server startup only
 
-The JAddin may be started with the special parameter «Debug!» to activate the debugging during startup, e.g. `Load RunJava JAddin AddinName Debug!`
-
 ### Console Commands
 
-Several Domino console commands are supported:
+The framework supports a number of special commands.
 
 **Command** | **Description**
 Version!	 | Display the JAddin, Java and OS version numbers
@@ -111,6 +103,41 @@ Debug! | Enable the debug logging to the console
 NoDebug!	 | Disable the debug logging to the console
 HeartBeat! | Manually start heartbeat processing (automatically done every 15 seconds)
 Help! | Displays this help text
+
+### Debugging
+
+For problem determination, you may enable debugging with the special parameter `Debug!`. To stop the debugging, use the parameter `NoDebug!`. While active debugging adds a significant amount of data to the console log and to the log.nsf database, it can be helpful in finding the root of a problem.
+
+`Load RunJava AddinName Squirrel Debug!` | Start your add-in in debug mode
+`Tell AddinName Debug!` | Start the debug mode while the add-in is running
+`Tell AddinName NoDebug!` | Stop the debug mode while the add-in is running 
+
+The debug output is written to the Domino console and includes the name of the Java method with the source line number issuing the message.
+
+```text
+> Load RunJava JAddin HelloWorld Debug!
+12.01.2019 11:27:48   JVM: Java Virtual Machine initialized.
+12.01.2019 11:27:48   RunJava: Started JAddin Java task.
+12.01.2019 11:27:48   JAddin: Debug logging enabled - Enter 'Tell HelloWorld NoDebug!' to disable
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(111)                JAddin framework version 2.0.0
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(112)                Addin HelloWorld will be called with parameters null
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(115)                Creating the Domino message queue
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(133)                Opening the Domino message queue
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(151)                Loading the user Java class HelloWorld
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(163)                User Java class HelloWorld successfully loaded
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(175)                => HelloWorld.addinInitialize()
+12.01.2019 11:27:48   DEBUG: HelloWorld.addinInitialize(75)      -- Method addinInitialize()
+12.01.2019 11:27:48   DEBUG: HelloWorld.addinInitialize(89)      Creating the Domino session
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(177)                <= HelloWorld.addinInitialize()
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(188)                => HelloWorld.start()
+12.01.2019 11:27:48   DEBUG: JAddin.runNotes(190)                <= HelloWorld.start()
+12.01.2019 11:27:48   DEBUG: HelloWorld.runNotes(114)            -- Method runNotes()
+12.01.2019 11:27:48   DEBUG: HelloWorld.runNotes(127)            => HelloWorld.addinStart()
+12.01.2019 11:27:48   HelloWorld: Started with parameters null
+12.01.2019 11:27:48   HelloWorld: Running on Release 10.0.1 November 29, 2018
+12.01.2019 11:27:48   HelloWorld: User code is executing ...
+> Tell HelloWorld q
+```
 
 ### Frequently Asked Questions
 
