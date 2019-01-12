@@ -2,15 +2,13 @@
 
 ![Domino](Domino-Icon.png)
 
-## Java Toolkit for IBM Domino Server Add-in
-
 Do you need to write an add-in for IBM Domino server in Java?
 
 The JAddin framework is a very thin and convenient layer between the Domino RunJava task and your Java application code. It greatly helps you to create Java server tasks by freeing you to learn all the Domino add-in specifics such as message queue handling, thread creation, communicating with the console, resource cleanup, etc. It is written entirely in Java to support all Domino versions and platforms.
 
 ### Prerequisites
 
-- IBM Domino 9.0.1 FP8 or higher (JVM 1.8 requirement)
+- IBM Domino 9.0.1 FP8 or higher (Java Virtual Machine 1.8+ requirement)
 
 ### Example
 
@@ -51,13 +49,15 @@ public class HelloWorld extends JAddinThread {
 }
 ```
 
-### Create Application JAR File
+### Application Development 
 
-To distribute your add-in with the JAddin framework, you can build a single JAR with all the required Java code.
+To be able to use this framework, you must simply add the `JAddin.class`, `JAddinThread.class` and the `notes.jar` file from your IBM Notes or IBM Domino installation to your development environment.
 
-#### Build the JAR File
+### Application Testing and Distribution
 
-##### Create MANIFEST.MF file
+To distribute and install your add-in, you must include a valid `MANIFEST.MF`, the framework files `JAddin.class` and `JAddinThread.class` together with your application code.
+
+#### Create MANIFEST.MF file
 
 Make sure that the file includes an empty line at the bottom.
 
@@ -67,17 +67,17 @@ Class-Path: .
 Main-Class: AddinName
 ```
 
-##### Create JAR container
+#### Create JAR container
 
 There are many tools available to create JAR containers, but the easiest way is to use the command line.
 
 `jar cvmf MANIFEST.MF AddinName.jar AddinName.class JAddin.class JAddinThread.class`
 
-##### Install Application
+#### Install Application
 
 Copy this JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java class to load.
 
-##### Run application
+#### Run application
 
 There are several ways to start the application:
 
@@ -142,26 +142,26 @@ The debug output is written to the Domino console and includes the name of the J
 ### Frequently Asked Questions
 
 - Q: How do I develop my JAddin project in Eclipse?
-- A: Make sure that you include the JAddin framework JAR files and the notes.jar file (installed with Notes and Domino) as external files in your project.
+- A: Make sure you include the two JAddin framework class files and the notes.jar file (installed with Notes and Domino) as external files in your project.
 
-- Q: During startup, I see the error message `RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/JAddIn in the classpath. Class names are case-sensitive.`
-- A: Make sure that the class names in the "Load RunJava" are entered with exact upper and lower case.
+- Q: During startup, I see the error message `RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/AddinName in the classpath.  Class names are case-sensitive.`
+- A: The RunJava task was unable to load the class. Make sure that it is written with exact upper and lower case characters.
 
-- Q: During startup, I see the error message `JAddin: Error: Unable to load the Java class AddinName.`
-- A: The JAddin framework tried to load the Java class AddinName but the specified name could not be found. Make sure that the class file AddinName.class is found in the Domino program directory (Windows) or in the Domino data directory (Linux).
+- Q: During startup, I see the error message `JAddin: Unable to load Java class AddinName`
+- A: The JAddin framework was unable to load the user class. Make sure that it is written with exact upper and lower case characters.
 
 - Q: During startup, I see the error message `RunJava: Can't find stopAddin method for class AddinName.`
-- A: Make sure you start your add-in thru JAddin with the command `Tell RunJava JAddin AddinName` and not directly thru RunJava.
+- A: The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
 
 - Q: I see out-of-memory errors in Java while executing my add-in.
-- A: All Java add-ins execute in a single JVM under the control of RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
+- A: All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
 
 - Q: What is the heartbeart in JAddin?
-- A: The main thread in JAddin gets triggered every 15 seconds to perform some internal housekeeping checks. One of these checks makes sure that the Java heap space does not get filled up to avoid out-of-memory errors in Java. If the free space falls below 10 percent, the Java virtual machine garbage collector is invoked and a message is written to the console.
+- A: The main thread in JAddin gets triggered every 15 seconds to perform some internal housekeeping tasks. One of these checks makes sure that the Java heap space does not get filled up to avoid out-of-memory errors. If the free space falls below 10 percent, the Java virtual machine garbage collector is invoked and a message is written to the console.
 
 ### Author
 
-This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my [email address](mailto:andy.brunner@k43.ch).
+This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my [email address](mailto:andy.brunner@abdata.ch).
 
 ### Unlicense (see [unlicense.org](http://unlicense.org))
 
@@ -170,4 +170,3 @@ _This software shall be used for Good, not Evil._
 ***
 
 *Created with love and passion in the beautiful country of Switzerland. As far as I know, no animal was harmed in the making of this program.*
-
