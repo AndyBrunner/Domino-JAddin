@@ -23,6 +23,7 @@ The JAddin framework is a very thin and convenient layer between the Domino RunJ
 ```java
 public class HelloWorld extends JAddinThread {
 
+	// This is the main entry point. When this method returns, the add-in terminates.
 	public void addinStart() {
 		
 		logMessage("Started with parameters <" + getAddinParameters() + '>');
@@ -40,14 +41,16 @@ public class HelloWorld extends JAddinThread {
 		}
 	}
 
-	// This method is called asynchronously by the JAddin framework when the command 'Quit' or 'Exit' is entered or at Domino
-	// server shutdown. Here you may signal the addinStart() method to terminate and to perform any cleanup.
+	// This method is called asynchronously by the JAddin framework when the
+	// command 'Quit' or 'Exit' is entered or at Domino server shutdown. Here
+	// you may signal the addinStart() method to terminate and to perform any cleanup.
 	public void addinStop() {
 		logMessage("Termination in progress");
 	}
 	
-	// This method is called asynchronously by the JAddin framework for any console command entered. It should be executed as
-	// quickly as possible to avoid any main Domino message queue delays.
+	// This method is called asynchronously by the JAddin framework for any
+	// console command entered. It should be executed as quickly as possible
+	// to avoid any main Domino message queue delays.
 	public void addinCommand(String command) {
 		logMessage("You have entered the command " + command);
 	}
