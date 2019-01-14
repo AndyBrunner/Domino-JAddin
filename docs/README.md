@@ -49,6 +49,29 @@ public class HelloWorld extends JAddinThread {
 }
 ```
 
+### Framework Architecture
+
+#### JAddin.class
+
+The JAddin class is loaded by the Domino RunJava as the main Java thread.
+
+- Shares the Java Virtual Machine (JVM) of RunJava
+- Dynamically loads and starts the user add-in (Subclass of JAddinThread)
+- Monitors the Java heap space usage and calls the garbage collector if the free heap space is below 10 percent
+- Acts on special commands (see 'Help!')
+- Calls several user add-in methods, e.g. addinCommand(), addInStop()
+
+#### JAddinThread.class
+
+This abstract class must be implemented by the user add-in class. It runs as a separate thread to avoid any delays in the Domino message queue handling. Several methods are included to help the developer with accessing Domino objects and the Domino server add-in environment.
+
+- Initialize the runtime environment
+- Calls the user class thru addinStart()
+
+#### AddinName.class
+
+The user code runs in this class and does all the processing of the application. Several methods are called by the framework and can be implemented by the user class (see the documentation). When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
+
 ### Application Development 
 
 To be able to use this framework, you must simply add the `JAddin.class`, `JAddinThread.class` and the `notes.jar` file from your IBM Notes or IBM Domino installation to your development environment.
@@ -102,6 +125,23 @@ The framework supports a number of special commands:
 12.01.2019 18:18:02   JAddin: NoDebug!    Disable the debug logging to the console
 12.01.2019 18:18:02   JAddin: Heartbeat!  Manually start heartbeat processing (automatically done every 15 seconds)
 12.01.2019 18:18:02   JAddin: Help!       Displays this help text
+```
+
+### Domino Statistics
+
+The JAddin framework periodically sets a number of Domino statistic values which are shown with the `Show Stat AddinName' command.
+
+```text
+> Show Stat HelloWorld
+  HelloWorld.Domino.Version = Release 10.0.1|November 29, 2018
+  HelloWorld.JAddin.Date = 14-Jan-2019
+  HelloWorld.JAddin.StartTime = Mon Jan 14 10:22:04 CET 2019
+  HelloWorld.JAddin.Version = 2.0.0
+  HelloWorld.JVM.GCCount = 1
+  HelloWorld.JVM.HeapDefinedKB = 131'072
+  HelloWorld.JVM.HeapUsedKB = 20'781
+  HelloWorld.JVM.Version = 1.8.0_181 (IBM Corporation)
+  HelloWorld.OS.Version = 6.2 (Windows 8)
 ```
 
 ### Debugging
