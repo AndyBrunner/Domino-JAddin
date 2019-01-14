@@ -53,24 +53,31 @@ public class HelloWorld extends JAddinThread {
 
 #### JAddin.class
 
-The JAddin class is loaded by the Domino RunJava as the main Java thread.
+The JAddin class is loaded by the Domino RunJava as the main Java thread. It shares the Java Virtual Machine (JVM) with RunJava.
 
-- Shares the Java Virtual Machine (JVM) of RunJava
+- Initialize the JAddin framework
 - Dynamically loads and starts the user add-in (Subclass of JAddinThread)
-- Monitors the Java heap space usage and calls the garbage collector if the free heap space is below 10 percent
-- Acts on special commands (see 'Help!')
-- Calls several user add-in methods, e.g. addinCommand(), addInStop()
+- Monitors the Java heap space usage and calls the garbage collector if needed
+- Acts on special framework commands (see 'Help!')
+- Calls user add-in methods, e.g. addinCommand(), addInStop()
 
 #### JAddinThread.class
 
-This abstract class must be implemented by the user add-in class. It runs as a separate thread to avoid any delays in the Domino message queue handling. Several methods are included to help the developer with accessing Domino objects and the Domino server add-in environment.
+This abstract class must be implemented by the user add-in class. It runs as a separate thread to minimize any delays on the normal processing of the Domino server.
 
 - Initialize the runtime environment
 - Calls the user class thru addinStart()
+- Support methods for accessing Domino objects and the server environment
 
 #### AddinName.class
 
-The user code runs in this class and does all the processing of the application. Several methods are called by the framework and can be implemented by the user class (see the documentation). When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
+The user code runs in this class and does all the processing of the application. Several methods are called from the framework and can be implemented by the user class. When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
+
+- addinStart() is called run the application code
+- addinCommand() is called for any console command enteredä
+- addinStop() is called just before termination
+- addinNextHour() and addinNextDay() are called at these time intervals
+- See the documentation for all other supporting methods
 
 ### Application Development 
 
