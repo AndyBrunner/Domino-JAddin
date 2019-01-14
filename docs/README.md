@@ -124,9 +124,7 @@ The framework supports a number of special commands:
 ```text
 > Tell HelloWorld Help!
 12.01.2019 18:18:02   JAddin: The following JAddin commands are available:
-12.01.2019 18:18:02   JAddin: Version!    Display JAddin, Java and OS version numbers
 12.01.2019 18:18:02   JAddin: Quit!       Terminate the add-in thru the JAddin framework
-12.01.2019 18:18:02   JAddin: Memory!     Display the Java virtual machine memory usage
 12.01.2019 18:18:02   JAddin: GC!         Executes the Java virtual machine garbage collector
 12.01.2019 18:18:02   JAddin: Debug!      Enable the debug logging to the console
 12.01.2019 18:18:02   JAddin: NoDebug!    Disable the debug logging to the console
@@ -214,7 +212,7 @@ The debug output is written to the Domino console and includes the name of the J
 
 ### Author
 
-This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my [email address](mailto:andy.brunner@abdata.ch).
+This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my email address [andy.brunner@abdata.ch](mailto:andy.brunner@abdata.ch).
 
 ### Unlicense (see [unlicense.org](http://unlicense.org))
 
