@@ -1,4 +1,4 @@
-[Homepage](README.md) | [API Documentation](api/index.html) | [Download](DOWNLOAD.md) | [Release History](HISTORY.md) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin)
+[Homepage](README.md) | [API Documentation](api/index.html) | [Download](DOWNLOAD.md) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin)
 
 ![Domino](Domino-Icon.png)
 
