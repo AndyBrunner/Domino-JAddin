@@ -81,7 +81,7 @@ The user code runs in this class and does all the processing of the application.
 
 ### Application Development 
 
-To be able to use this framework, you must simply add the `JAddin.class`, `JAddinThread.class` and the `notes.jar` file from your IBM Notes or IBM Domino installation to your development environment.
+To be able to use this framework, you must add the `JAddin.class`, `JAddinThread.class` and the `notes.jar` file from your IBM Notes or IBM Domino installation to your development environment.
 
 ### Application Testing and Distribution
 
@@ -134,7 +134,7 @@ The framework supports a number of special commands:
 
 ### Domino Statistics
 
-The JAddin framework periodically sets a number of Domino statistic values which are shown with the `Show Stat AddinName' command.
+The JAddin framework periodically sets a number of Domino statistic values which are shown with the `Show Stat AddinName` command.
 
 ```text
 > Show Stat HelloWorld
