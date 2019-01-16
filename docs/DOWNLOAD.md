@@ -8,7 +8,7 @@
 - Now requires JVM 1.8+ (Domino 9.0.1 FP8+)
 - Many new and changed methods to support Domino applications
 - Complete rewrite of the documentation and publish it on GitHub
-- Create jaddin.abdata.ch homepage on GitHub
+- Create project homepage at https://jaddin.abdata.ch
 
 **Version 1.3.0 24-Mar-2015 (Beta test user only)**
 - Change: Replace the Thread termination sequence by Thread.interrupt()
