@@ -2,7 +2,7 @@
 
 ### Downloads
 
-**Version 2.0.0 Planned for Jan-2019**
+**Version 2.0.0 16-Jan-2019**
 
 - Major rewrite of JAddin.java and JAddinThread
 - Now requires JVM 1.8+ (Domino 9.0.1 FP8+)
