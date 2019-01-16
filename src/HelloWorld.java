@@ -13,7 +13,7 @@ public class HelloWorld extends JAddinThread {
 
 		// Main add-in loop ...
 		while (true) {
-			logMessage("User code is executing ...");
+			logMessage("User code is executing...");
 			waitMilliSeconds(15000L);
 		}
 	}
