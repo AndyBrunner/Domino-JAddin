@@ -2,7 +2,7 @@
 
 ### Downloads
 
-**Version 2.0.0 16-Jan-2019**
+**[Version 2.0.0 16-Jan-2019](JAddin-2.0.0.zip)**
 
 - Major rewrite of JAddin.java and JAddinThread
 - Now requires JVM 1.8+ (Domino 9.0.1 FP8+)
@@ -18,7 +18,7 @@
 - Add: New method recycleObjects() to free Domino object resources
 - Add: New documentation chapter to explain program flow
 
-***[Version 1.2.0 18-Dec-2013](JAddin-1.2.0.zip)***
+**[Version 1.2.0 18-Dec-2013](JAddin-1.2.0.zip)***
 
 - Add: New command "Version!" to display JAddin, Java and OS version numbers.
 - Change: Send the low heap memory warning message only once for each threshold reached.
