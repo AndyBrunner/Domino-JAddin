@@ -253,10 +253,8 @@ This framework was created to help implementing projects which required the use 
 
 ### 9. Unlicense (see [unlicense.org](http://unlicense.org))
 
-_This software shall be used for Good, not Evil._
+This software shall be used for Good, not Evil.
 
 ***
 
-*Created with love and passion in the beautiful country of Switzerland.*
-
-*As far as I know, no animal was harmed in the making of this software :)*
+*Created with love and passion in the beautiful city of Zurich. As far as I know, no animal was harmed in the making of this software :)*

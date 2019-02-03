@@ -51,8 +51,6 @@ public final class JAddin extends JavaServerAddin {
 	/**
 	 * This constructor is called by the IBM Domino RunJava task if no arguments are specified.
 	 * (<code>"Load RunJava JAddin"</code>).
-	 * 
-	 * @return	Created thread instance
 	 */
 	public JAddin() {
 		logMessage("Missing required parameter <AddinName>");
@@ -65,7 +63,6 @@ public final class JAddin extends JavaServerAddin {
 	 * (<code>"Load RunJava JAddin HelloWorld"</code>).
 	 * 
 	 * @param 	args[]	Passed arguments in the command line
-	 * @return	Created thread instance
 	 */
 	public JAddin(String[] args) {
 		this.jAddinArgs = args;
@@ -533,7 +530,7 @@ public final class JAddin extends JavaServerAddin {
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
 	 * @param	id		Domino task id
-	 * @param	text	Text to be set
+	 * @param	message	Text to be set
 	 */
 	public final void setAddinState(int id, String message) {
 		
@@ -686,6 +683,7 @@ public final class JAddin extends JavaServerAddin {
 	 * 
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
+	 * @param	addinName	Name of add-in
 	 * @param	message		Message to be displayed
 	 */
 	public final void logMessage(String addinName, String message) {
@@ -712,6 +710,7 @@ public final class JAddin extends JavaServerAddin {
 	 * 
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
+	 * @param 	addinName	Name of Add-in
 	 * @param	message		Message to be displayed
 	 */
 	public final synchronized void logDebug(String addinName, String message) {
@@ -833,7 +832,7 @@ public final class JAddin extends JavaServerAddin {
 	/**
 	 * Convert ISO 8601 date string to Java Date
 	 * 
-	 * @param date Java Date object
+	 * @param isoDate Java Date object
 	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
 	 */
 	static final Calendar fromISODate(String isoDate) {
