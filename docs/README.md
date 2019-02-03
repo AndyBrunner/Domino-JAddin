@@ -73,7 +73,7 @@ public class HelloWorld extends JAddinThread {
 
 ### 2. Application Distribution 
 
-To distribute and install your add-in as a JAR file container, you must include a valid `MANIFEST.MF`, the framework files `JAddin.class` and `JAddinThread.class` together with your application code.
+To distribute and install your add-in as a JAR file container, you must create a JAR container which includes a valid `MANIFEST.MF` file and the framework files `JAddin.class` and `JAddinThread.class`.
 
 **Create MANIFEST.MF file**
 
@@ -120,7 +120,7 @@ shares the Java Virtual Machine (JVM) with RunJava.
 
 **JAddinThread.class**
 
-This is the abstract class which must be implemented by a user add-in class. It runs as a separate thread to minimize any delays on the normal processing of the Domino server.
+This abstract class which must be implemented by a user add-in class. It runs as a separate thread to minimize any delays on the normal processing of the Domino server.
 
 - Initialize the runtime environment
 - Calls the user class thru addinStart()
@@ -128,13 +128,16 @@ This is the abstract class which must be implemented by a user add-in class. It 
 
 **AddinName.class**
 
-The user code runs in this class and does all the processing of the application. Several methods are called from the framework and may be implemented by the user class. When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
+The user code runs in this subclass of JAddinThread and does all the processing of the application. Several methods are called from the framework which can be implemented by the user class. When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
 
-- addinStart() is called to run the application code
-- addinCommand() is called for any console command entered
-- addinStop() is called just before termination
-- addinNextHour() and addinNextDay() are called at these time intervals
-- See the documentation for all other supporting methods
+**Method** | **Description**
+addinStart() | Starts the the application code
+addinCommand() | When any console command is entered
+addinStop() | Called before termination
+addinNextHour() | Called at each new hour
+addinNextDay() | Called at each new day
+
+There are many supporting methods provided by the superclass JAddinThread (see the documentation).
 
 ### 4. Console Commands
 
@@ -157,6 +160,7 @@ The JAddin framework sets and maintains a number of Domino statistic which are s
 ```text
 > Show Stat HelloWorld
   HelloWorld.Domino.Version = Release 10.0.1|November 29, 2018 (Windows/64)
+  HelloWorld.Domino.Platform = 6.2 (Windows 8)  
   HelloWorld.JAddin.StartedTime = 2019-02-03T08:31:47Z
   HelloWorld.JAddin.VersionDate = 2019-02-03
   HelloWorld.JAddin.VersionNumber = 2.1.0
@@ -164,13 +168,13 @@ The JAddin framework sets and maintains a number of Domino statistic which are s
   HelloWorld.JVM.HeapLimitKB = 131'072
   HelloWorld.JVM.HeapUsedKB = 20'489
   HelloWorld.JVM.Version = 1.8.0_181 (IBM Corporation)
-  HelloWorld.OS.Version = 6.2 (Windows 8)
 ```
 
 ### 6. Debugging
 
 For problem determination, you may enable debugging with the special parameter `Debug!`. While active debugging adds a significant amount of data to the console log and to the log.nsf database, it can be helpful in finding the root of a problem.
 
+**Command** | **Description**
 `Load RunJava JAddin AddinName Debug!` | Start your add-in in debug mode
 `Tell AddinName Debug!` | Enable debug mode while the add-in is running
 `Tell AddinName NoDebug!` | Disable the debug mode while the add-in is running 

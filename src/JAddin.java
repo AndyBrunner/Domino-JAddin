@@ -27,7 +27,7 @@ public final class JAddin extends JavaServerAddin {
 	final String			JADDIN_VERSION			= "2.1.0";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
 	final String			JADDIN_DATE				= "2019-02-03";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
 	
-	final String			STAT_OS_VERSION			= "OS.Version";
+	final String			STAT_OS_VERSION			= "Domino.Platform";
 	final String			STAT_JVM_VERSION		= "JVM.Version";
 	final String			STAT_JVM_HEAPDEFINEDKB	= "JVM.HeapLimitKB";
 	final String			STAT_JVM_HEAPUSEDKB		= "JVM.HeapUsedKB";
