@@ -1,6 +1,6 @@
 [Homepage](README.md) | [API Documentation](api/index.html) | [Download](DOWNLOAD.md) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin)
 
-![Domino](Domino-Icon.png) ![Java](Java-Icon.png)  
+![Domino](Domino-Icon.png) ![Plus](Plus-Icon.png) ![Java](Java-Icon.png)  
 
 _Do you need to write an add-in for IBM Domino server in Java?_
 
