@@ -1,24 +1,32 @@
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Vector;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import lotus.domino.NotesFactory;
 import lotus.domino.NotesException;
 import lotus.domino.NotesThread;
 import lotus.domino.Session;
+import lotus.domino.Stream;
 import lotus.domino.Base;
 import lotus.domino.Database;
+import lotus.domino.DateTime;
 import lotus.domino.Document;
+import lotus.domino.MIMEEntity;
 import lotus.domino.View;
 import lotus.domino.ViewEntry;
 import lotus.domino.ViewEntryCollection;
-import lotus.domino.RichTextItem;
 
 /**
- * This abstract class is started as an separate thread by the JAddin. It establishes the JAddin user framework
- * and calls the user code. The code running in this thread should avoid any long-running or blocking code to
- * prohibit delays in processing of the IBM Domino message queue.
+ * This abstract class must be implemented by the user add-in. JAddinThread is started as an separate thread by
+ * JAddin. It establishes the JAddin user framework and calls the user code. The code running in this thread
+ * should avoid any long-running or blocking code to prohibit delays in processing of the IBM Domino message queue.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.0.0 - 16-Jan-2019
+ * @version	2.1.0 - 2019-02-03
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */
@@ -38,18 +46,14 @@ public abstract class JAddinThread extends NotesThread {
 	private String		dbLastErrorMessage	= null;
 
 	/** Dummy constructor
-	 * 
-	 * @param 	-
-	 * @return	Object	Thread instance
 	 */
 	public JAddinThread() {
 	}
 	
 	/**
-	 * Return live state of JAddin main thread 
+	 * Return live state of JAddin main thread .
 	 * 
-	 * @param	-
-	 * @returns	boolean		Returns true if the JAddin main thread is alive, else otherwise
+	 * @return	Indicator if JAddin main thread is alive or not
 	 */
 	public final boolean isJAddinAlive() {
 		
@@ -61,10 +65,10 @@ public abstract class JAddinThread extends NotesThread {
 	}
 
 	/**
-	 * This is the first method called by the main JAddin thread to initialize the JAddinThread
+	 * This is the first method called by the main JAddin thread to initialize the JAddinThread.
 	 * 
-	 * @param JAddin	JAddin thread
-	 * @param args		Passed arguments or null ("Load RunJava JAddin <AddinName> xxxxxxxx")
+	 * @param mainThread	JAddin thread
+	 * @param args			Passed arguments or null (<code>"Load RunJava JAddin AddinName xxxxxxxx"</code>)
 	 */
 	public final void addinInitialize(JAddin mainThread, String args) {
 		
@@ -91,28 +95,22 @@ public abstract class JAddinThread extends NotesThread {
 			this.dominoSession = NotesFactory.createSession();
 
 			// Set initial Domino statistic
-			setDominoStatistic(this.STAT_DOMINO_VERSION, dominoSession.getNotesVersion().trim() + ' ' + dominoSession.getPlatform());
+			setDominoStatistic(this.STAT_DOMINO_VERSION, dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
 			
 		} catch (NotesException e) {
-			logMessage("Unable to create session object: " + e.text);
+			logMessage("Unable to create Domino session object: " + e.text);
 			this.startupError = true;
 		}
 	}
 	
 	/**
-	 * This method is called by JAddinThread after all initialization work is done.
-	 * 
-	 * @param	-
-	 * @return	-
+	 * This is the main entry point for the user add-in. It is called by JAddinThread after all initialization work is done.
 	 */
 	public abstract void addinStart();
 
 	/**
 	 * This method is called from the JAddin framework indirectly thru start(). Its main purpose is to call the
 	 * user code thru addinStart().
-	 * 
-	 * @param	-
-	 * @return	-
 	 */
 	public final void runNotes() {
 		
@@ -149,22 +147,11 @@ public abstract class JAddinThread extends NotesThread {
 	/**
 	 * This method is executed when the command "Quit" or "Exit" is entered or during Domino server shutdown. After this
 	 * method returns, the add-in will be terminated.
-	 * 
-	 * Note: This method is called from the JAddin main thread. It should return as quickly as possible to avoid
-	 * 		 any processing delays of the Domino server message queue.
-	 * 
-	 * @param	-
-	 * @return	-
 	 */
 	public abstract void addinStop();
 	
 	/**
 	 * Terminate the current add-in
-	 * 
-	 * Note: This method is called by JAddin
-	 * 
-	 * @param	-
-	 * @return	-
 	 */
 	public final void addinTerminate() {
 		
@@ -175,48 +162,28 @@ public abstract class JAddinThread extends NotesThread {
 	}
 
 	/**
-	 * This method is executed for every command entered at the Domino console, e.g. <code>"Tell <AddinName> xxxxxxxx"</code>.
+	 * This method is executed for every command entered at the Domino console, e.g. <code>"Tell AddinName xxxxxxxx"</code>.
 	 * 
-	 * Note: This method is called from the JAddin main thread. It should return as quickly as possible to avoid
-	 * 		 any processing delays of the Domino server message queue.
-	 * 
-	 * @param	String		command
-	 * @return	-
+	 * @param	command	Passed command line
 	 */
 	public void addinCommand(String command) {
 		logMessage("This add-in does not support any console commands except 'Quit'");
 	}
 	
 	/**
-	 * This method is called at the beginning of an hour
-	 * 
-	 * Note: This method is called from the JAddin main thread. It should return as quickly as possible to avoid
-	 * 		 any processing delays of the Domino server message queue.
-	 * 
-	 * @param	-
-	 * @return	-
+	 * This method is called at the beginning of every hour.
 	 */
 	public void addinNextHour() {
 	}
 
 	/**
-	 * This method is called at the beginning of a new day
-	 * 
-	 * Note: This method is called from the JAddin main thread. It should return as quickly as possible to avoid
-	 * 		 any processing delays of the Domino server message queue.
-	 * 
-	 * @param	-
-	 * @return	-
+	 * This method is called at the beginning of every new day.
 	 */
 	public void addinNextDay() {
 	}
 	
 	/**
-	 * Performs all necessary cleanup tasks.
-	 * 
-	 * @param -
-	 * @returns -
-	 * 
+	 * This method performs all necessary cleanup tasks.
 	 */
 	private final void addinCleanup() {
 	
@@ -252,7 +219,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * Set the add-in status message text. This text is shown in response to the Domino console command <code>"show tasks"</code>.
 	 * 
 	 * @param 	message		Status message
-	 * @return	-
 	 */
 	public final void setAddinState(String message) {
 		if (isJAddinAlive())
@@ -262,8 +228,7 @@ public abstract class JAddinThread extends NotesThread {
 	/**
 	 * Set the debug state
 	 * 
-	 * @param	debugFlag	Debug state 
-	 * @return	-
+	 * @param	debugState	Debug state 
 	 */
 	public final void setDebugState(boolean debugState) {
 		if (isJAddinAlive())
@@ -273,8 +238,7 @@ public abstract class JAddinThread extends NotesThread {
 	/**
 	 * Get the debug state
 	 * 
-	 * @param	- 
-	 * @return	boolean		Status of debug logging
+	 * @return	Status of debug logging
 	 */
 	public final boolean getDebugState() {
 		if (isJAddinAlive())
@@ -288,7 +252,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * 
 	 * @param statsName		Name of statistics
 	 * @param text			Statistics text
-	 * @return -
 	 */
 	public final void setDominoStatistic(String statsName, String text) {
 		if (isJAddinAlive())
@@ -300,7 +263,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * 
 	 * @param statsName		Name of statistics
 	 * @param value			Statistics value
-	 * @return -
 	 */
 	public final void setDominoStatistic(String statsName, Double value) {
 		if (isJAddinAlive())
@@ -311,7 +273,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * Delete the Domino statistics show in response to 'Show Stat' command.
 	 * 
 	 * @param statsName		Name of statistics
-	 * @return -
 	 */
 	public final void deleteDominoStatistic(String statsName) {
 		if (isJAddinAlive())
@@ -319,10 +280,9 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Get the parameters passed to the add-in
+	 * Get the parameters passed to the add-in.
 	 * 
-	 * @param	-
-	 * @return	String		Arguments passed to this add-in or null
+	 * @return	Arguments passed to this add-in or null
 	 */
 	public final String getAddinParameters() {
 		return this.startArguments;
@@ -333,7 +293,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * followed by a column, e.g. <code>"HelloWorld: xxxxxxxx"</code>
 	 * 
 	 * @param 	message		Message to be displayed
-	 * @return	-
 	 */
 	public final void logMessage(String message) {
 		if (isJAddinAlive())
@@ -343,18 +302,13 @@ public abstract class JAddinThread extends NotesThread {
 	/**
  	 * Write debug message to the Domino console. The message string will be prepended with the debugging
 	 * information, e.g. <code>"DEBUG: AddinName.MethodName(LineNumber) xxxxxxxx"</code>.
-	 *
-	 * @see		#setDebugState(boolean)			
 	 * 
 	 * @param	message		Message to be displayed
-	 * @return	-
 	 */
 	public final void logDebug(String message) {
 		
-		if (isJAddinAlive()) {
-			if (jAddin.getDebugState()) {
-				jAddin.logDebug(this.userAddinName, message);
-			}
+		if (isJAddinAlive() && jAddin.getDebugState()) {
+			jAddin.logDebug(this.userAddinName, message);
 		}
 	}
 	
@@ -362,7 +316,6 @@ public abstract class JAddinThread extends NotesThread {
 	 * Delay the execution of the thread
 	 * 
 	 * @param	waitTime	Wait time in milliseconds
-	 * @return	- 
 	 */
 	public final void waitMilliSeconds(long waitTime) {
 		
@@ -374,11 +327,119 @@ public abstract class JAddinThread extends NotesThread {
 			immediateTermination();
 		}
 	}
+
+	/**
+	 * Encode passed buffer to padded Base64 string
+	 * 
+	 * @param buffer	Buffer to convert
+	 * @return Base64 encoded string in upper-case
+	 */
+	public final synchronized String toBase64(byte[] buffer) {
+		
+		try {
+			return (Base64.getEncoder().encodeToString(buffer));
+		} catch (Exception e) {
+			logMessage("Unable to encode buffer to Base64: " + e.getMessage());
+			return null;
+		}
+	}
 	
+	/**
+	 * Decode passed padded Base64 string
+	 * 
+	 * @param data	Base64 string to decode
+	 * @return Decoded buffer
+	 */
+	public final synchronized byte[] fromBase64(String data) {
+		
+		try {
+			return (Base64.getDecoder().decode(data));
+		} catch (Exception e) {
+			logMessage("Unable to decode from Base64 string: " + e.getMessage());
+			return (new byte[0]);
+		}
+	}
+	
+	/**
+	 * AES-128 encrypt the passed buffer with the passed secret key.
+	 * 
+	 * @param dataBuffer Clear text buffer
+	 * @param secretKey	Secret key for encryption
+	 * @return Encrypted buffer
+	 */
+	public final synchronized byte[] encryptAES(byte[] dataBuffer, byte[] secretKey) {
+				
+		try {
+			// MD5 hash the secret key and trim down hash to 128 bits
+			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+			messageDigest.update(secretKey);
+			byte[] secretKeyHash128Bit = Arrays.copyOf(messageDigest.digest(), 16);
+			SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyHash128Bit, "AES");
+			
+			// Create the cipher
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+
+			// Encrypt the buffer
+			return (cipher.doFinal(dataBuffer));
+			
+		} catch (Exception e) {
+			logMessage("Unable to encrypt to AES-128 buffer: " + e.getMessage());
+			return (new byte[0]);
+		}
+	}
+	
+	/**
+	 * AES-128 decrypt the passed buffer with the passed secret key.
+	 * 
+	 * @param dataBuffer Clear text buffer
+	 * @param secretKey	Secret key for encryption
+	 * @return Encrypted buffer
+	 */
+	public final synchronized byte[] decryptAES(byte[] dataBuffer, byte[] secretKey) {
+
+		try {
+			
+			// MD5 hash the secret key and trim down hash to 128 bits
+			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+			messageDigest.update(secretKey);
+			byte[] secretKeyHash128Bit = Arrays.copyOf(messageDigest.digest(), 16);
+			SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyHash128Bit, "AES");
+			
+			// Create the cipher
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
+
+			// Encrypt the buffer
+			return (cipher.doFinal(dataBuffer));
+			
+		} catch (Exception e) {
+			logMessage("Unable to decrypt from AES-128 buffer: " + e.getMessage());
+			return (new byte[0]);
+		}
+	}
+	
+	/**
+	 * Hash the passed byte array
+	 * @param hashType	Hash type (MD5, SHA-1, SHA-256)
+	 * @param buffer	Buffer to hash
+	 * @return	Hash code or empty byte array for errors
+	 */
+	public final synchronized byte[] generateHash(String hashType, byte[] buffer) {
+		
+		try {
+			MessageDigest messageDigest = MessageDigest.getInstance(hashType);
+			messageDigest.update(buffer);
+			return ( messageDigest.digest());
+		} catch (Exception e) {
+			logMessage("Unable to hash with " + hashType + " algorithm: " + e.getMessage());
+			return (new byte[0]);
+		}
+	}
+
 	/**
 	 * Return last error message from the dbXXXX methods.
 	 *
-	 * @param -
 	 * @return String	Error message
 	 */
 	public final String dbGetLastErrorMessage() {
@@ -386,10 +447,10 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Recycle Domino object(s)
+	 * Recycle Domino object(s).
 	 * 
 	 * @param	dominoObjects... Domino object(s) to be recycled (supports arrays and Vectors)
-	 * @returns	boolean			 Indicator (Success or failure)
+	 * @return	Indicator (Success or failure)
 	 */
 	public final boolean dbRecycleObjects(Object... dominoObjects) {
 	
@@ -404,8 +465,16 @@ public abstract class JAddinThread extends NotesThread {
 			if (object != null) {
 				
 				// Recursively call this method for arrays or vectors
-				if ((object.getClass().isArray()) || (object instanceof Vector)) {
-					for (Object innerObject : dominoObjects)
+				if (object.getClass().isArray()) {
+					Object[] objectArray = (Object[]) object;
+
+					for (Object innerObject : objectArray)
+						dbRecycleObjects(innerObject);
+				}
+				
+				if (object instanceof Vector) {
+					Vector<?> objectVector = (Vector<?>) object;
+					for (Object innerObject : objectVector)
 						dbRecycleObjects(innerObject);
 				}
 				
@@ -427,9 +496,8 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Return the Domino session object
+	 * Return the Domino session object.
 	 * 
-	 * @param	-
 	 * @return	Session		Domino session object
 	 */
 	public final lotus.domino.Session dbGetSession() {
@@ -437,13 +505,10 @@ public abstract class JAddinThread extends NotesThread {
 	}
 
 	/**
-	 * Open the Domino database
+	 * Open the Domino database.
 	 * 
-	 * IMPORTANT: The Domino database object returned must each be recycled by the calling
-	 * 			  routine, e.g. <code>dbRecycleObjects(db);</code>
-	 * 
-	 * @param	String		Database name with path
-	 * @returns	Database	Domino database object or null for errors
+	 * @param	dbName	Database name with path
+	 * @return	Domino database object (must use <code>dbRecycleObject()</code> or null for errors 
 	 */
 	public final Database dbOpen(String dbName) {
 		
@@ -461,9 +526,8 @@ public abstract class JAddinThread extends NotesThread {
 			db = dbGetSession().getDatabase(null, dbName);
 			
 			// Return null if any error
-			if (db == null) {
+			if (db == null)
 				return null;
-			}
 
 			if (!db.isOpen()) {
 				dbRecycleObjects(db);
@@ -471,8 +535,8 @@ public abstract class JAddinThread extends NotesThread {
 			}
 		} catch (Exception e) {
 			logDebug("Domino database " + dbName + " open failed: " + e.getMessage());
-			dbRecycleObjects(db);
 			this.dbLastErrorMessage = e.getMessage();
+			dbRecycleObjects(db);
 			return null;
 		}
 		
@@ -481,10 +545,10 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Check if Domino database is open
+	 * Check if Domino database is open.
 	 * 
 	 * @param	db		Domino database
-	 * @return	boolean	True if database is open, false otherweie
+	 * @return	True if database is open, false otherwise
 	 */
 	public final boolean isDbOpen(Database db) {
 		
@@ -509,16 +573,12 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Get all documents or documents matching a key from a view
-	 * 
-	 * IMPORTANT: The Domino documents returned in the Vector<Document> must each be recycled
-	 * 			  by the calling routine, e.g.
-	 * 			  <code>for (Document doc : documentVector); dbRecycleObjects(doc);</code>
+	 * Get all documents or documents matching a key from a view.
 	 * 
 	 * @param	db					Domino database
 	 * @param	viewName			Domino view name
 	 * @param	key					Key for lookup or null to return all documents
-	 * @return	Vector<Document>	Documents or empty Vector if error or empty
+	 * @return	Documents (must use <code>dbRecycleObjects()</code> or null if error or empty
 	 */
 	public final Vector<Document> dbGetAllDocuments(Database db, String viewName, String key) {
 		
@@ -566,9 +626,11 @@ public abstract class JAddinThread extends NotesThread {
 				else
 					logDebug("View " + dominoDbName + '/' + viewName + " has no documents matching key " + key);
 				
-				dbRecycleObjects(dominoView);
+				dbRecycleObjects(dominoViewEntryCollection, dominoView);
 				return documentVector;
 			}
+			
+			logDebug("View " + dominoDbName + '/'+ viewName + " entries: " + dominoViewEntryCollection.getCount());
 			
 			// Read thru all view entries and get document
 			dominoViewEntry = dominoViewEntryCollection.getFirstEntry();
@@ -576,6 +638,7 @@ public abstract class JAddinThread extends NotesThread {
 			while (dominoViewEntry != null) {
 				
 				documentVector.add(dominoViewEntry.getDocument());
+				
 				dominoViewEntryNext = dominoViewEntryCollection.getNextEntry();
 
 				// Recycle previous entry
@@ -603,12 +666,12 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Get a single Domino document based on the passed key
+	 * Get a single Domino document based on the passed key.
 	 * 
 	 * @param	db			Domino database
 	 * @param	viewName	Domino view name
 	 * @param	key			Lookup key 
-	 * @return	Document	Domino document or null if error
+	 * @return	Domino document (must use <code>dbRecylceObjects()</code>) or null if error
 	 */
 	public final Document dbGetSingleDocumentByKey(Database db, String viewName, String key) {
 
@@ -660,11 +723,11 @@ public abstract class JAddinThread extends NotesThread {
 	}
 		
 	/**
-	 * Get item in Domino document
+	 * Get item in Domino document.
 	 * 
 	 * @param	document	Domino document
 	 * @param	itemName	Domino item name
-	 * @return	String		Item value converted to string or null if error
+	 * @return	Item value converted to string or null if error
 	 */
 	public final String dbGetDocumentItem(Document document, String itemName) {
 		
@@ -698,12 +761,12 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Set item in Domino document
+	 * Set item in Domino document.
 	 * 
 	 * @param	document	Domino document
 	 * @param	itemName	Domino item name
 	 * @param	data		Item to be set
-	 * @return	boolean		Success or error
+	 * @return	Success or error
 	 */
 	public final boolean dbSetDocumentItem(Document document, String itemName, Object data) {
 
@@ -718,7 +781,7 @@ public abstract class JAddinThread extends NotesThread {
 			return false;
 				
 		try {
-			document.replaceItemValue(itemName, data);
+			document.replaceItemValue(itemName, data);				
 		} catch (Exception e) {
 			logDebug("Unable to set value in item " + itemName + ": " + e.getMessage());
 			this.dbLastErrorMessage = e.getMessage();
@@ -729,10 +792,10 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Save the Domino document
+	 * Save the Domino document.
 	 * 
 	 * @param	document	Domino document
-	 * @return	boolean		Indicator (success or failure)
+	 * @return	Indicator (success or failure)
 	 */
 	public final boolean dbSaveDocument(Document document) {
 
@@ -756,58 +819,112 @@ public abstract class JAddinThread extends NotesThread {
 	 * Create and send a message. If the message delivery fails, a message will be written to the Domino console.
 	 * 
 	 * @param	principal	Principal name or null
-	 * @param	replyTo		Reply address or null
 	 * @param	from		Senders name
 	 * @param	to			Recipient name
-	 * @param	cc			Copy recipient(s)
-	 * @param	bcc			Blind carbon copy recipient(s) or null
-	 * @param	subject		Subject or null
-	 * @param	body		Message body (String or RichTextItem)
-	 * @return	boolean		Success or failure indicator 			 
+	 * @param	subject		Subject
+	 * @param	contentType	Content type of body, e.g. "text/html"
+	 * @param	body		Body data
+	 * @return	Success or failure indicator 			 
 	 */
-	public final boolean dbSendMessage(String principal, String replyTo, String from, String to, String cc, String bcc, String subject, Object body) {
+	public final boolean dbSendMessage(String principal, String from, String to, String subject, String contentType, byte[] body) {
+		return (dbSendMessage(principal, from, null, to, null, null, subject, contentType, body));
+	}
+		
+	/**
+	 * Create and send a message. If the message delivery fails, a message will be written to the Domino console.
+	 * 
+	 * @param	principal	Principal name or null
+	 * @param	from		Senders name
+	 * @param	replyTo		Reply address or null
+	 * @param	to			Recipient name
+	 * @param	cc			Copy recipient or null
+	 * @param	bcc			Blind carbon copy recipient or null
+	 * @param	subject		Subject
+	 * @param	contentType	Content type of body, e.g. "text/html"
+	 * @param	body		Body data
+	 * @return	Success or failure indicator 			 
+	 */
+	public final boolean dbSendMessage(String principal, String from, String replyTo, String to, String cc, String bcc, String subject, String contentType, byte[] body) {
 		
 		// Initialize
 		this.dbLastErrorMessage = null;
 
-		// Check arguments
+		// Check arguments and set defaults
+		if ((principal != null) && (principal.length() == 0))
+			principal = null;
+		
 		if ((from == null) || (from.length() == 0)) 
 			return false;
 		
 		if ((to == null) || (to.length() == 0)) 
 			return false;
 
-		if (body == null) {
-			return false;
+		if ((cc != null) && (cc.length() == 0))
+			cc = null;
+
+		if ((bcc != null) && (bcc.length() == 0))
+			bcc = null;
+		
+		if ((subject != null) && (subject.length() == 0))
+			subject = "(No subject)";
+		
+		if ((contentType == null) || (contentType.length() == 0))
+			contentType = "Text/Plain";
+
+		if ((body == null) || (body.length == 0)) {
+			body = "(No content)".getBytes();
 		}
 		
- 		if (!(body instanceof String) && !(body instanceof RichTextItem)) {
-			return false;
- 		}
- 		
 		// Variables
-		Database		routerMailBox	= null;
-		Document		mailDocument	= null;
-		RichTextItem	rtItem			= null;
+		Stream			dominoStream		= null;
+		Database		dominoMailBox		= null;
+		Document		mailDocument		= null;
+		MIMEEntity		dominoMIMEEntity	= null;
+		DateTime		dominoDateTime		= null;
 	
 		logDebug("-- dbSendMessage()");
 		
 		// Open router mail box
-		routerMailBox = dbOpen("mail.box");
+		dominoMailBox = dbOpen("mail.box");
 		
-		if (routerMailBox == null) {
+		if (dominoMailBox == null) {
 			logMessage("Unable to open Domino router mail box");
 			return false;
 		}
+
+		logDebug("Sending message: From " + from + " to " + to);
+		
+		boolean dominoMIMEState = false; 
 				
 		try {
-			// Create mail message
-			mailDocument = routerMailBox.createDocument();
+			// Disable MIME conversion
+			dominoMIMEState = dbGetSession().isConvertMime();
+			dbGetSession().setConvertMime(false);
 			
+			// Get Domino domain name
+			String dominoDomain = dbGetSession().getEnvironmentString("Domain", true);
+			
+			// Create mail message
+			mailDocument = dominoMailBox.createDocument();
+			
+			// Set required fields
 			mailDocument.replaceItemValue("Form", "Memo");
 			
 			if (principal != null)
-				mailDocument.replaceItemValue("Principal", principal + '@' + dbGetSession().getEnvironmentString("Domain", true));
+				mailDocument.replaceItemValue("Principal", '\"' + principal + "\"<" + from + ">@" + dominoDomain);
+			else
+				mailDocument.replaceItemValue("Principal", from + '@' + dominoDomain);
+
+			mailDocument.replaceItemValue("From", from);
+			mailDocument.replaceItemValue("INETFrom", from);
+			mailDocument.replaceItemValue("Sender", from);
+			mailDocument.replaceItemValue("SMTPOriginator", from);
+			mailDocument.replaceItemValue("SendTo", to + '@' + dominoDomain);
+			mailDocument.replaceItemValue("Recipients", to + '@' + dominoDomain);
+			
+			dominoDateTime = dbGetSession().createDateTime("Today");
+		    dominoDateTime.setNow();
+			mailDocument.replaceItemValue("PostedDate", dominoDateTime);
 	
 			if (replyTo != null)
 				mailDocument.replaceItemValue("ReplyTo", replyTo);
@@ -818,41 +935,36 @@ public abstract class JAddinThread extends NotesThread {
 			if (bcc != null)
 				mailDocument.replaceItemValue("BlindCopyTo", bcc);
 	
-			if (subject != null)
-				mailDocument.replaceItemValue("Subject", subject);
-	
-			// Set body to string or rich-text item
-			if (body instanceof String)
-				mailDocument.replaceItemValue("Body", body);
+			mailDocument.replaceItemValue("Subject", subject);
+
+			// Set MIME body of message
+			dominoStream = dbGetSession().createStream();
+			dominoStream.write(body);			
+			dominoMIMEEntity = mailDocument.createMIMEEntity("Body");
+			dominoMIMEEntity.setContentFromBytes(dominoStream, contentType, MIMEEntity.ENC_NONE);
+			dominoStream.truncate();
+			dominoStream.close();
 			
-			if (body instanceof RichTextItem) {
-				rtItem = mailDocument.createRichTextItem("Body");
-				rtItem.appendRTItem((RichTextItem) body);
-			}
-						
 			// Store the document in the router mail box for further delivery
-			mailDocument.send(to);
+			mailDocument.save(true);
+
+			// Reset MIME conversion state
+			dbGetSession().setConvertMime(dominoMIMEState);
+			
+			logDebug("Document successfully created in router mail box for " + to);
+			dbRecycleObjects(dominoDateTime, dominoMIMEEntity, dominoStream, mailDocument, dominoMailBox);
+			return true;
 			
 		} catch (NotesException e) {
-			logMessage("Unable to create mail document in Domino router mail box: " + e.text);
-			dbRecycleObjects(rtItem, mailDocument, routerMailBox);
+			logMessage("Unable to create mail document in router mail box: " + e.text);
 			this.dbLastErrorMessage = e.getMessage();
+			dbRecycleObjects(dominoDateTime, dominoMIMEEntity, dominoStream, mailDocument, dominoMailBox);
 			return false;
 		}
-	
-		// Free the Domino objects
-		dbRecycleObjects(rtItem, mailDocument, routerMailBox);
-		
-		// Return success to the caller
-		logDebug("Document successfully created in Domino router mail box");
-		return true;
 	}
 
 	/**
-	 * Immediately terminate the thread
-	 * 
-	 * @param	-
-	 * @return	-
+	 * Immediately terminate the thread.
 	 */
 	@SuppressWarnings("deprecation")
 	private void immediateTermination() {
@@ -865,10 +977,7 @@ public abstract class JAddinThread extends NotesThread {
 	}
 	
 	/**
-	 * Finalize is called by the JVM when this object is removed from memory
-	 * 
-	 * @param -
-	 * returns -
+	 * Finalize is called by the JVM when this object is removed from memory.
 	 */
 	public void finalize() {
 		addinCleanup();
