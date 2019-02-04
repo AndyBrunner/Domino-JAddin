@@ -134,7 +134,7 @@ The user code runs in this subclass of JAddinThread and does all the processing 
 addinStart() | Yes | Starts the the application code
 addinCommand() | No | Called for any console command entered
 addinStop() | Yes | Called before termination
-addinNextHour() | No |  Called at each new hour
+addinNextHour() | No | Called at each new hour
 addinNextDay() | No | Called at each new day
 
 There are many supporting methods provided by the superclass JAddinThread (see the documentation).
@@ -233,7 +233,6 @@ The debug output is written to the Domino console and includes the name of the J
 `RunJava: Can't find stopAddin method for class AddinName.` | The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
 `RunJava JVM: java.lang.NoClassDefFoundError: Addinname (wrong name: AddinName)` | The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.
 `Out of memory` | All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
-
 
 ### 8. Frequently Asked Questions
 
