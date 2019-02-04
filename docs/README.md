@@ -73,11 +73,11 @@ public class HelloWorld extends JAddinThread {
 
 ### 2. Application Distribution 
 
-To distribute and install your add-in as a JAR file container, you must create a JAR container which includes a valid `MANIFEST.MF` file and the framework files `JAddin.class` and `JAddinThread.class`.
+To distribute and install your add-in, you must create a JAR container which includes a `MANIFEST.MF` file and the framework files `JAddin.class` and `JAddinThread.class`.
 
 **Create MANIFEST.MF file**
 
-Make sure that the file includes an empty line at the bottom.
+Make sure that the last line is terminated with a newline character.
 
 ```text
 Manifest-Version: 1.0
@@ -87,13 +87,13 @@ Main-Class: AddinName
 
 **Create JAR container**
 
-There are many tools available to create JAR containers, but the easiest way is to use the command line.
+There are many tools available to create JAR containers. The easiest way is to use the command line.
 
 `jar cvmf MANIFEST.MF AddinName.jar AddinName.class JAddin.class JAddinThread.class`
 
 **Install Application**
 
-Copy this JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java class to load.
+Copy the JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java classes to load.
 
 **Run application**
 
@@ -110,32 +110,32 @@ There are several ways to start the application:
 **JAddin.class**
 
 The JAddin class is loaded by the Domino RunJava task as the main Java thread. It executes under the control of RunJava and
-shares the Java Virtual Machine (JVM) with RunJava.
+shares the IBM Domino Java Virtual Machine (JVM) with RunJava.
 
 - Initialize the JAddin framework
 - Dynamically loads and starts the user add-in as a subclass of JAddinThread
 - Monitors the Java heap space usage and calls the garbage collector if needed
 - Acts on special framework commands (see command `Help!`)
-- Calls user add-in methods, e.g. addinCommand(), addInStop(), addinNextHour(), etc.
+- Calls user add-in methods addInXXX() (see below)
 
 **JAddinThread.class**
 
-This abstract class which must be implemented by a user add-in class. It runs as a separate thread to minimize any delays on the normal processing of the Domino server.
+This abstract class which must be implemented by the user add-in class. It runs as a separate thread to minimize any delays on the normal processing of the Domino server.
 
 - Initialize the runtime environment
 - Calls the user class thru addinStart()
-- Several support methods for accessing Domino objects and the server environment
+- Includes several methods for accessing Domino objects and the server environment
 
 **AddinName.class**
 
 The user code runs in this subclass of JAddinThread and does all the processing of the application. Several methods are called from the framework which can be implemented by the user class. When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
 
-**Method** | **Description**
-addinStart() | Starts the the application code
-addinCommand() | When any console command is entered
-addinStop() | Called before termination
-addinNextHour() | Called at each new hour
-addinNextDay() | Called at each new day
+**Method** | **Required** | **Description**
+addinStart() | Yes | Starts the the application code
+addinCommand() | No | Called for any console command entered
+addinStop() | Yes | Called before termination
+addinNextHour() | No |  Called at each new hour
+addinNextDay() | No | Called at each new day
 
 There are many supporting methods provided by the superclass JAddinThread (see the documentation).
 
@@ -225,25 +225,20 @@ The debug output is written to the Domino console and includes the name of the J
 03.02.2019 09:36:29   RunJava shutdown.
 ```
 
-### 7. Frequently Asked Questions
+### 7. Common Error Messages
+
+**Error Message** | **Possible Reason**
+`RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/AddinName in the classpath.  Class names are case-sensitive.` | The RunJava task was unable to load the class. Make sure that it is written with exact upper and lower case characters.
+`JAddin: Unable to load Java class AddinName` | The JAddin framework was unable to load the user class. Make sure that it is written with exact upper and lower case characters.
+`RunJava: Can't find stopAddin method for class AddinName.` | The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
+`RunJava JVM: java.lang.NoClassDefFoundError: Addinname (wrong name: AddinName)` | The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.
+`Out of memory` | All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
+
+
+### 8. Frequently Asked Questions
 
 - Q: How do I develop my JAddin project in Eclipse?
 - A: Make sure you include the two JAddin framework class files and the notes.jar file (installed with Notes and Domino) as external files in your project.
-
-- Q: During startup, I see the error message `RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/AddinName in the classpath.  Class names are case-sensitive.`
-- A: The RunJava task was unable to load the class. Make sure that it is written with exact upper and lower case characters.
-
-- Q: During startup, I see the error message `JAddin: Unable to load Java class AddinName`
-- A: The JAddin framework was unable to load the user class. Make sure that it is written with exact upper and lower case characters.
-
-- Q: During startup, I see the error message `RunJava: Can't find stopAddin method for class AddinName.`
-- A: The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
-
-- Q: During startup, I see the error message `RunJava JVM: java.lang.NoClassDefFoundError: Addinname (wrong name: AddinName)`
-- A: The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.
-
-- Q: I see out-of-memory errors in Java while executing my add-in.
-- A: All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space.
 
 - Q: What is the heartbeart in JAddin?
 - A: The main thread in JAddin gets triggered every 15 seconds to perform some internal housekeeping tasks. One of these checks makes sure that the Java heap space does not get filled up to avoid out-of-memory errors. If the free space falls below 10 percent, the Java virtual machine garbage collector is invoked and a message is written to the console.
@@ -251,11 +246,11 @@ The debug output is written to the Domino console and includes the name of the J
 - Q: I have copied a new version of my add-in to the server, but it does not get active during application startup.
 - A: The RunJava task caches the Java classes in use. You must terminate all other RunJava tasks - and therefore terminate RunJava itself - to be able to force the reloading of your class file. 
 
-### 8. Author
+### 9. Author
 
 This framework was created to help implementing projects which required the use of Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know. If you want to share some details of your projects based on JAddin, I will be glad to publish them here. You may contact me thru my email address [andy.brunner@abdata.ch](mailto:andy.brunner@abdata.ch).
 
-### 9. Unlicense (see [unlicense.org](http://unlicense.org))
+### 10. Unlicense (see [unlicense.org](http://unlicense.org))
 
 This software shall be used for Good, not Evil.
 
