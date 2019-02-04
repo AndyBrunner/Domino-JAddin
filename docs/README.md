@@ -228,7 +228,7 @@ The debug output is written to the Domino console and includes the name of the J
 ### 7. Common Error Messages
 
 **Error Message** | **Possible Reason**
-`RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/AddinName in the classpath.  Class names are case-sensitive.` | The RunJava task was unable to load the class. Make sure that it is written with exact upper and lower case characters.
+`RunJava: Can't find class JAddIn or lotus/notes/addins/jaddin/AddinName in the classpath.  Class names are case-sensitive.` | The RunJava task was unable to load the class. Make sure that it is written with exact upper and lower case characters and it can be found by the RunJava class loader.
 `JAddin: Unable to load Java class AddinName` | The JAddin framework was unable to load the user class. Make sure that it is written with exact upper and lower case characters.
 `RunJava: Can't find stopAddin method for class AddinName.` | The user class must be loaded thru the JAddin framework and not directly from RunJava. Use the command `Load RunJava JAddin AddinName` to start the user class.
 `RunJava JVM: java.lang.NoClassDefFoundError: Addinname (wrong name: AddinName)` | The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.
