@@ -1,4 +1,4 @@
-[Homepage](README.md) | [Installation](INSTALLATION.md) | [Hints and Tipps](HINTS-AND-TIPPS.md) | [API Documentation](api/index.html) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin) | [Download](DOWNLOAD.md)
+[Homepage](README.md) | [Installation](INSTALLATION.md) | [Hints and Tips](HINTS-AND-TIPS.md) | [API Documentation](api/index.html) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin) | [Download](DOWNLOAD.md)
 
 ### 1. Framework Architecture
 

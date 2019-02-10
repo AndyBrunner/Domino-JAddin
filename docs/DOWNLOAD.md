@@ -1,5 +1,4 @@
-[Homepage](README.md) | [Installation](INSTALLATION.md) | [Hints and Tipps](HINTS-AND-TIPPS.md) | [API Documentation](api/index.html) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin) | [Download](DOWNLOAD.md)
-
+[Homepage](README.md) | [Installation](INSTALLATION.md) | [Hints and Tips](HINTS-AND-TIPS.md) | [API Documentation](api/index.html) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin) | [Download](DOWNLOAD.md)
 ### Downloads
 
 **[Version 2.1.0 2019-02-03](JAddin-2.1.0.zip)**
