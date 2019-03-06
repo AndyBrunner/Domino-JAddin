@@ -884,12 +884,16 @@ public abstract class JAddinThread extends NotesThread {
 	
 		logDebug("-- dbSendMessage()");
 		
-		// Open router mail box
+		// Open router mail box (mail.box or mail1.box)
 		dominoMailBox = dbOpen("mail.box");
 		
 		if (dominoMailBox == null) {
-			logMessage("Unable to open Domino router mail box");
-			return false;
+			dominoMailBox = dbOpen("mail1.box");
+			
+			if (dominoMailBox == null) {
+				logMessage("Unable to open Domino router mail box");
+				return false;
+			}
 		}
 
 		logDebug("Sending message: From " + from + " to " + to);
