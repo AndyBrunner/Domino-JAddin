@@ -24,8 +24,8 @@ public final class JAddin extends JavaServerAddin {
 	
 	// Constants
 	final String			JADDIN_NAME				= "JAddin";
-	final String			JADDIN_VERSION			= "2.1.0";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			JADDIN_DATE				= "2019-02-03";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_VERSION			= "2.1.1";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_DATE				= "2019-03-07";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
 	
 	final String			STAT_OS_VERSION			= "Domino.Platform";
 	final String			STAT_JVM_VERSION		= "JVM.Version";
