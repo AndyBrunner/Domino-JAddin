@@ -16,7 +16,7 @@ import lotus.notes.internal.MessageQueue;
  * 			called by the JAddinThread and the user add-in class.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.0 - 2019-02-03
+ * @version	2.1.1 - 2019-03-07
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */

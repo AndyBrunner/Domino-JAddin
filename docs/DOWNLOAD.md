@@ -1,6 +1,10 @@
 [Homepage](README.md) | [Installation](INSTALLATION.md) | [Hints and Tips](HINTS-AND-TIPS.md) | [API Documentation](api/index.html) | [Open Source Code](https://github.com/AndyBrunner/Domino-JAddin) | [Download](DOWNLOAD.md)
 ### Downloads
 
+**[Version 2.1.1 2019-03-07](JAddin-2.1.1.zip)**
+
+- Change: dbSendMessage now uses mail1.box if mail.box is not present
+
 **[Version 2.1.0 2019-02-03](JAddin-2.1.0.zip)**
 
 - Added static methods JAddin.fromISODateUTC() and JAddin.toISODateUTC()

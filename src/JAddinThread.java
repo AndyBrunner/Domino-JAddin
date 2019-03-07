@@ -26,7 +26,7 @@ import lotus.domino.ViewEntryCollection;
  * should avoid any long-running or blocking code to prohibit delays in processing of the IBM Domino message queue.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.0 - 2019-02-03
+ * @version	2.1.1 - 2019-03-07
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */
@@ -884,7 +884,7 @@ public abstract class JAddinThread extends NotesThread {
 	
 		logDebug("-- dbSendMessage()");
 		
-		// Open router mail box (mail.box or mail1.box)
+		// Open router mail box mail.box or mail1.box
 		dominoMailBox = dbOpen("mail.box");
 		
 		if (dominoMailBox == null) {
