@@ -26,7 +26,7 @@ import lotus.domino.ViewEntryCollection;
  * should avoid any long-running or blocking code to prohibit delays in processing of the IBM Domino message queue.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.1 - 2019-03-07
+ * @version	2.1.2 - 2021-01-25
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */
@@ -96,6 +96,8 @@ public abstract class JAddinThread extends NotesThread {
 
 			// Set initial Domino statistic
 			setDominoStatistic(this.STAT_DOMINO_VERSION, dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
+			
+			logDebug("Domino version: " + dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
 			
 		} catch (NotesException e) {
 			logMessage("Unable to create Domino session object: " + e.text);

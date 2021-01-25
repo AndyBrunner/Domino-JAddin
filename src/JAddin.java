@@ -16,7 +16,7 @@ import lotus.notes.internal.MessageQueue;
  * 			called by the JAddinThread and the user add-in class.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.1 - 2019-03-07
+ * @version	2.1.2 - 2021-01-25
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */
@@ -24,8 +24,8 @@ public final class JAddin extends JavaServerAddin {
 	
 	// Constants
 	final String			JADDIN_NAME				= "JAddin";
-	final String			JADDIN_VERSION			= "2.1.1";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			JADDIN_DATE				= "2019-03-07";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_VERSION			= "2.1.2";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_DATE				= "2021-01-25";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
 	
 	final String			STAT_OS_VERSION			= "Domino.Platform";
 	final String			STAT_JVM_VERSION		= "JVM.Version";
@@ -103,6 +103,7 @@ public final class JAddin extends JavaServerAddin {
 		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE, this.JADDIN_DATE);
 		setDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION, System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
 		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB, new Double(Runtime.getRuntime().maxMemory() / 1024));
+		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, new Double((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024));
 		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, new Double(jvmGCCounter));
 		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME, JAddin.toISODateUTC(new Date()));
 
@@ -142,8 +143,10 @@ public final class JAddin extends JavaServerAddin {
 		}
 	
 		logDebug(this.JADDIN_NAME + " framework version " + this.JADDIN_VERSION);
+		logDebug("OS platform: " + System.getProperty("os.version", "n/a") + " (" + System.getProperty("os.name", "n/a") + ")");
+		logDebug("JVM version: " + System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
 		logDebug(this.userAddinName + " will be called with parameters " + this.userAddinParameter);
-			
+		
 		// Create and open the message queue
 		logDebug("Creating the Domino message queue");
 
@@ -169,7 +172,7 @@ public final class JAddin extends JavaServerAddin {
 			jAddinCleanup();
 			return;
 		}
-	
+
 		// Dynamically load the class specified in the start parameter, e.g. "Load RunJava JAddin HelloWorld".
 		Class<?>	classClass				= null;
 		Method		classAddinInitialize	= null;
