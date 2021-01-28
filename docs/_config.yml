@@ -1,7 +1,0 @@
-theme: jekyll-theme-cayman
-title: JAddin
-description: Java Toolkit for IBM Domino Server Add-in
-show-downloads: false
-
-github:
-  is_project_page: false
