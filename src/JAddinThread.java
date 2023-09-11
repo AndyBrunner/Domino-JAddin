@@ -1,3 +1,5 @@
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
@@ -88,7 +90,7 @@ public abstract class JAddinThread extends NotesThread {
 		
 		// Set the initial state
 		setAddinState("Executing addinInitialize() method");
-				
+
 		// Create Domino session
 		try {
 			logDebug("Creating the Domino session");

@@ -1,0 +1,5 @@
+- Create JAddin-x.x.x.zip from HelloWorld.class, JAddin.class and JAddinThead.class
+- Update GitHub source code
+- Update GitHub JavaDoc
+- Update jaddin.k43.ch website
+ 

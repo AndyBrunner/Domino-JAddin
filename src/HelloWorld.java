@@ -18,7 +18,7 @@ public class HelloWorld extends JAddinThread {
 		}
 	}
 
-	// This method is called asynchronously by the JAddin framework when the
+	// This method is called synchronously by the JAddin framework when the
 	// command 'Quit' or 'Exit' is entered or at Domino server shutdown. Here
 	// you may signal the addinStart() method to terminate and to perform any cleanup.
 	public void addinStop() {
@@ -26,8 +26,7 @@ public class HelloWorld extends JAddinThread {
 	}
 	
 	// This method is called asynchronously by the JAddin framework for any
-	// console command entered. It should be executed as quickly as possible
-	// to avoid any main Domino message queue delays.
+	// console command entered.
 	public void addinCommand(String command) {
 		logMessage("You have entered the command " + command);
 	}

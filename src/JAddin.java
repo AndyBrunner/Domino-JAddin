@@ -1,4 +1,9 @@
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,7 +21,7 @@ import lotus.notes.internal.MessageQueue;
  * 			called by the JAddinThread and the user add-in class.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.2 - 2021-01-25
+ * @version	2.1.3 - 2023-09-11
  * 
  * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
  */
@@ -24,8 +29,8 @@ public final class JAddin extends JavaServerAddin {
 	
 	// Constants
 	final String			JADDIN_NAME				= "JAddin";
-	final String			JADDIN_VERSION			= "2.1.2";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			JADDIN_DATE				= "2021-01-25";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_VERSION			= "2.1.3";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_DATE				= "2023-09-11";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
 	
 	final String			STAT_OS_VERSION			= "Domino.Platform";
 	final String			STAT_JVM_VERSION		= "JVM.Version";
@@ -77,7 +82,8 @@ public final class JAddin extends JavaServerAddin {
 		// Terminate immediately if startup has failed
 		if (this.startupError)
 			return;
-		
+
+		/* V 2.1.3 Remove JVM version check
 		// First test if the JVM meets the minimum requirement
 		try {
 			String jvmVersion = System.getProperty("java.specification.version", "0");
@@ -90,6 +96,7 @@ public final class JAddin extends JavaServerAddin {
 			logMessage("Unable to detect the Java Virtual Machine version number: " + e.getMessage());
 			return;
 		}
+		*/
 		
 		// Set the Java thread name to the class name (default would be "Thread-n")
 		setName(this.JADDIN_NAME);
@@ -182,7 +189,7 @@ public final class JAddin extends JavaServerAddin {
 		Method		classAddinCommand		= null;
 		Method		classAddinNextDay		= null;
 		Method		classAddinNextHour		= null;
-	
+
 		try {
 			logDebug("Loading the user Java class " + this.userAddinName);
 
