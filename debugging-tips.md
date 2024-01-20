@@ -2,7 +2,7 @@
 description: Hints and tips on the usage of the JAddin framework
 ---
 
-# Debugging Tips
+# 🐞 Debugging Tips
 
 ## Common Error Messages
 
@@ -14,7 +14,7 @@ description: Hints and tips on the usage of the JAddin framework
 | `RunJava JVM: java.lang.NoClassDefFoundError: AddinName (wrong name: addinname)`                                            | The user class name in the command and the internal name do not match. Most likely you have not typed the name with correct upper and lower case characters.                |
 | `Out of memory`                                                                                                             | All Java add-ins execute in a single Java Virtual Machine (JVM) in RunJava. The Domino Notes.Ini parameter `JavaMaxHeapSize=xxxxMB` may be used to increase the heap space. |
 
-## HCL Domino Statistics <a href="#3-domino-statistics" id="3-domino-statistics"></a>
+## HCL Domino Statistics <a href="#id-3-domino-statistics" id="id-3-domino-statistics"></a>
 
 During execution, the JAddin maintains statistics and status information. They can be displayed with the `Show Stat AddinName` command:
 
@@ -109,7 +109,7 @@ The debug output is written to the HCL Domino console and includes the name of t
 03.02.2019 09:36:29   RunJava shutdown.
 ```
 
-## Frequently Asked Questions <a href="#6-frequently-asked-questions" id="6-frequently-asked-questions"></a>
+## Frequently Asked Questions <a href="#id-6-frequently-asked-questions" id="id-6-frequently-asked-questions"></a>
 
 **Q: How do I develop my JAddin project in Eclipse?**\
 A: Make sure you include the two JAddin framework class files and the `notes.jar` file (installed with HCL Notes or HCL Domino) as external files in your Eclipse project.

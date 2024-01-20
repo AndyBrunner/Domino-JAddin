@@ -2,9 +2,9 @@
 description: How to install the JAddin framework
 ---
 
-# Installation
+# 🚀 Installation
 
-## 1. Prerequisites <a href="#1-prerequisites" id="1-prerequisites"></a>
+## 1. Prerequisites <a href="#id-1-prerequisites" id="id-1-prerequisites"></a>
 
 * HCL Domino 9.0.1 FP8 or higher (Java Virtual Machine 1.8+ requirement)
 
@@ -12,13 +12,13 @@ description: How to install the JAddin framework
 To avoid out-of-memory errors in the Java Virtual Memory (JVM), make sure the JVM heap size is set to at least 256 MB in the Notes.ini on the HCL Domino server, e.g. `JavaMaxHeapSize=256MB`
 {% endhint %}
 
-## 2. Installation <a href="#2-installation" id="2-installation"></a>
+## 2. Installation <a href="#id-2-installation" id="id-2-installation"></a>
 
 * [Download](download-1/download.md) and unzip the installation package.
 * Copy the `JAddin.class` and `JAddinThread.class` from the installation package to your development environment.
 * Copy the `notes.jar` file from your HCL Notes or HCL Domino installation to your development environment.
 
-## 3. Application Distribution <a href="#3-application-distribution" id="3-application-distribution"></a>
+## 3. Application Distribution <a href="#id-3-application-distribution" id="id-3-application-distribution"></a>
 
 To distribute and install your add-in, you must create a JAR container which includes:
 
@@ -48,7 +48,7 @@ This example creates a new `AddinName.jar` file with the application `AddinName.
 
 Copy the JAR container to the `domino/ndext` directory. This directory is automatically searched by the RunJava task for any Java classes to load.
 
-## 4. Run Application <a href="#4-run-application" id="4-run-application"></a>
+## 4. Run Application <a href="#id-4-run-application" id="id-4-run-application"></a>
 
 There are several ways to start the application:
 

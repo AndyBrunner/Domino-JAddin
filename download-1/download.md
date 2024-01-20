@@ -2,7 +2,7 @@
 description: How to download the JAddin framework
 ---
 
-# Download
+# ⬇ Download
 
 ## Downloads
 

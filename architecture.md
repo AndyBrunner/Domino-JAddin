@@ -2,9 +2,9 @@
 description: Some background information on the framework architecture
 ---
 
-# Architecture
+# ℹ Architecture
 
-## Framework Architecture <a href="#1-framework-architecture" id="1-framework-architecture"></a>
+## Framework Architecture <a href="#id-1-framework-architecture" id="id-1-framework-architecture"></a>
 
 The JAddin architecture consists of two Java classes which are distributed with your application code. An picture of the architecture can be downloaded here:
 

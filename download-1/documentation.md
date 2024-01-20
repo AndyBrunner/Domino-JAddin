@@ -2,7 +2,7 @@
 description: Access to the JavaDoc API documentation
 ---
 
-# Documentation
+# 📖 Documentation
 
 ## Documentation
 
