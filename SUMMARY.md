@@ -1,9 +1,12 @@
 # Table of contents
 
 * [JAddin Framework](README.md)
-* [🚀 Installation](installation.md)
-* [🐞 Debugging Tips](debugging-tips.md)
-* [ℹ Architecture](architecture.md)
+
+## Quick Start
+
+* [🚀 Installation](quick-start/installation.md)
+* [🐞 Debugging Tips](quick-start/debugging-tips.md)
+* [ℹ Architecture](quick-start/architecture.md)
 
 ## Download <a href="#download-1" id="download-1"></a>
 

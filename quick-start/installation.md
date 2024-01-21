@@ -14,7 +14,7 @@ To avoid out-of-memory errors in the Java Virtual Memory (JVM), make sure the JV
 
 ## 2. Installation <a href="#id-2-installation" id="id-2-installation"></a>
 
-* [Download](download-1/download.md) and unzip the installation package.
+* [Download](../download-1/download.md) and unzip the installation package.
 * Copy the `JAddin.class` and `JAddinThread.class` from the installation package to your development environment.
 * Copy the `notes.jar` file from your HCL Notes or HCL Domino installation to your development environment.
 
@@ -56,7 +56,7 @@ There are several ways to start the application:
 
 The easiest and recommended way is to add a program document in the HCL Domino directory.
 
-![Sample Program Document](.gitbook/assets/JAddin-Program-Document.png)
+![Sample Program Document](../.gitbook/assets/JAddin-Program-Document.png)
 
 ### **Option 2: Console Command**
 
