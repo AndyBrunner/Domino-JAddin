@@ -1,6 +1,6 @@
 # Table of contents
 
-* [JAddin Framework](README.md)
+* [JAddin for HCL Domino Framework (Freeware)](README.md)
 
 ## Quick Start
 
