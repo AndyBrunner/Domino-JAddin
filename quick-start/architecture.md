@@ -1,5 +1,16 @@
 ---
 description: Some background information on the framework architecture
+layout:
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: false
+  pagination:
+    visible: true
 ---
 
 # ℹ Architecture
@@ -8,7 +19,7 @@ description: Some background information on the framework architecture
 
 The JAddin architecture consists of two Java classes which are distributed with your application code. An picture of the architecture can be downloaded here:
 
-{% file src=".gitbook/assets/JAddin Architecture.pdf" %}
+{% file src="../.gitbook/assets/JAddin Architecture.pdf" %}
 
 ### **JAddin.class**
 

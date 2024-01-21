@@ -1,5 +1,16 @@
 ---
 description: Hints and tips on the usage of the JAddin framework
+layout:
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: false
+  pagination:
+    visible: true
 ---
 
 # 🐞 Debugging Tips
