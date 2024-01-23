@@ -2,9 +2,23 @@
 description: Java Toolkit for developers writing HCL Domino Server Add-ins
 cover: .gitbook/assets/Picture.jpg
 coverY: -12
+layout:
+  cover:
+    visible: true
+    size: full
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: false
+  pagination:
+    visible: true
 ---
 
-# JAddin Framework
+# JAddin for HCL Domino Java Framework (Freeware)
 
 ## Introduction
 
