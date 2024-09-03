@@ -25,7 +25,7 @@ To avoid out-of-memory errors in the Java Virtual Memory (JVM), make sure the JV
 
 ## 2. Installation <a href="#id-2-installation" id="id-2-installation"></a>
 
-* [Download](../download-1/download.md) and unzip the installation package.
+* [Download](../download/download.md) and unzip the installation package.
 * Copy the `JAddin.class` and `JAddinThread.class` from the installation package to your development environment.
 * Copy the `notes.jar` file from your HCL Notes or HCL Domino installation to your development environment.
 

@@ -8,10 +8,10 @@
 * [🐞 Debugging Tips](quick-start/debugging-tips.md)
 * [ℹ️ Architecture](quick-start/architecture.md)
 
-## Download <a href="#download-1" id="download-1"></a>
+## Download
 
-* [📖 Documentation](download-1/documentation.md)
-* [⬇️ Download](download-1/download.md)
+* [📖 Documentation](download/documentation.md)
+* [⬇️ Download](download/download.md)
 
 ## GitHub
 

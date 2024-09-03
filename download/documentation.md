@@ -24,5 +24,3 @@ Download
 {% endfile %}
 
 To view the documentation, download and unzip this package and point your browser to the `index.html`page.
-
-##
