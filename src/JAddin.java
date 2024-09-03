@@ -1,9 +1,4 @@
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,34 +8,34 @@ import lotus.notes.addins.JavaServerAddin;
 import lotus.notes.internal.MessageQueue;
 
 /**
- * This JAddin class - together with the JAddinThread class - is a framework used to create IBM Domino
+ * This JAddin class - together with the JAddinThread class - is a framework used to create HCL Domino
  * server add-in programs.
  *
  * Notes: 	The code running in this thread should avoid any long-running or blocking code to prohibit
- * 			delays in processing the IBM Domino message queue. Some of the methods in this class are also
+ * 			delays in processing the HCL Domino message queue. Some of the methods in this class are also
  * 			called by the JAddinThread and the user add-in class.
  * 
  * @author	andy.brunner@abdata.ch
- * @version	2.1.3 - 2023-09-11
+ * @version	2.1.4
  * 
- * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
+ * @see		<a href="https://jaddin.k43.ch">Homepage of Domino-JAddin</a>
  */
 public final class JAddin extends JavaServerAddin {
 	
 	// Constants
 	final String			JADDIN_NAME				= "JAddin";
-	final String			JADDIN_VERSION			= "2.1.3";			//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			JADDIN_DATE				= "2023-09-11";		//TODO: Always keep up with the README.md, DOWNLOAD.md and class comments
-	
+	final String			JADDIN_VERSION			= "2.1.4";			// Always keep up with the README.md, DOWNLOAD.md and class comments
+	final String			JADDIN_DATE				= "2024-09-03";		// Always keep up with the README.md, DOWNLOAD.md and class comments
 	final String			STAT_OS_VERSION			= "Domino.Platform";
 	final String			STAT_JVM_VERSION		= "JVM.Version";
 	final String			STAT_JVM_HEAPDEFINEDKB	= "JVM.HeapLimitKB";
 	final String			STAT_JVM_HEAPUSEDKB		= "JVM.HeapUsedKB";
 	final String			STAT_JVM_GCCount		= "JVM.GCCount";
+		
 	final String			STAT_JADDIN_VERSION		= JADDIN_NAME + ".VersionNumber";
 	final String			STAT_JADDIN_DATE		= JADDIN_NAME + ".VersionDate";
 	final String			STAT_JADDIN_STARTTIME	= JADDIN_NAME + ".StartedTime";
-		
+	
 	// Instance variables
 	private JAddinThread	jAddinThread			= null;
 	private String[]		jAddinArgs				= null;
@@ -49,12 +44,61 @@ public final class JAddin extends JavaServerAddin {
 	private MessageQueue	dominoMsgQueue			= null;
 	private int 			dominoTaskID			= 0;
 	private boolean			jAddinCleanupDone		= false;
+	
 	private boolean			startupError			= false;
+		
 	private boolean			debugState				= false;
+	
 	private int				jvmGCCounter			= 0;
 	
 	/**
-	 * This constructor is called by the IBM Domino RunJava task if no arguments are specified.
+	 * Convert ISO 8601 date string to Java Date
+	 * 
+	 * @param isoDate Java Date object
+	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
+	 */
+	static final Calendar fromISODate(String isoDate) {
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		Calendar calendar = Calendar.getInstance();
+		
+		try {
+			calendar.setTime(dateFormat.parse(isoDate));
+		} catch (Exception e) {
+			return null;
+		}
+		return (calendar);
+	}
+	/**
+	 * Convert Java Date to ISO 8601 UTC string
+	 *  
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param date Java Calendar object
+	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
+	 */
+	static final String toISODateUTC(Calendar date) {
+		return (toISODateUTC(date.getTime()));
+	}
+	/**
+	 * Convert Java Date to ISO 8601 UTC string
+	 *  
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param date Java Date object
+	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
+	 */
+	static final synchronized String toISODateUTC(Date date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return (dateFormat.format(date));	
+	}
+	
+
+	
+	/**
+	 * This constructor is called by the HCL Domino RunJava task if no arguments are specified.
 	 * (<code>"Load RunJava JAddin"</code>).
 	 */
 	public JAddin() {
@@ -62,9 +106,9 @@ public final class JAddin extends JavaServerAddin {
 		logMessage("Usage: 'Load RunJava JAddin <AddinName> [AddinParameters]'");
 		this.startupError = true;
 	}
-		
+
 	/**
-	 * This constructor is called by the IBM Domino RunJava task if any command line arguments is specified.
+	 * This constructor is called by the HCL Domino RunJava task if any command line arguments is specified.
 	 * (<code>"Load RunJava JAddin HelloWorld"</code>).
 	 * 
 	 * @param 	args[]	Passed arguments in the command line
@@ -72,10 +116,250 @@ public final class JAddin extends JavaServerAddin {
 	public JAddin(String[] args) {
 		this.jAddinArgs = args;
 	}
+
+	/**
+	 * Calls the Java virtual machines garbage collector.
+	 */
+	private final void callJavaGC() {
+		
+		logDebug("-- callJavaGC()");
+		
+		Runtime runtime = Runtime.getRuntime();
+
+		logDebug("Calling the Java virtual machine garbage collector");
+		long heapFreeMBStart = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
+		System.gc();
+		long heapFreeMBStop = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
+		
+		logMessage("JVM garbage collector reclaimed " + (heapFreeMBStop - heapFreeMBStart) + " KB memory");
+		
+		// Update Domino statistics
+		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, ((double) ++jvmGCCounter));
+	}
+
+	/**
+	 * Create the Domino task status line which is shown in <code>"show tasks"</code> command.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param	name	Name of task
+	 * @return	Domino task ID
+	 */
+	public final int createAddinStatusLine(String name) {
+		return (AddInCreateStatusLine(name));
+	}
+
+	/**
+	 * Delete the Domino task status line.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param	id	Domino task id
+	 */
+	public final void deleteAddinStatusLine(int id) {
+		if (id != 0)
+			AddInDeleteStatusLine(id);
+	}
+
+	/**
+	 * Delete the server statistic which is shown in command <code>"Show Stat"</code>.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param addinName		Name of statistics package
+	 * @param statsName		Name of statistics
+	 */
+	public final void deleteDominoStatistic(String addinName, String statsName) {
+		StatDelete(addinName, statsName);
+	}
+
+	/**
+	 * Wait for the next command from the Domino console and returns it.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @return	Entered command or "Quit!" (for "Quit", "Exit", Domino shutdown or errors).
+	 */
+	final private String getCommand() {
+
+		StringBuffer commandLine = new StringBuffer(1024);
+		
+		// Get next command from the queue ('Tell <Addin> xxxxxxxx") or timeout after 15 seconds
+		int messageQueueState = this.dominoMsgQueue.get(commandLine, 1024, MessageQueue.MQ_WAIT_FOR_MSG, 15000);
+		
+		// Quit or Exit (implicit)
+		if (messageQueueState == MessageQueue.ERR_MQ_QUITTING) {
+			logDebug("User entered Quit, Exit or Domino shutdown is in progress");
+			return "Quit!";				
+		}
+
+		// Check if 15 seconds timeout - Return heartbeat request
+		if (messageQueueState == MessageQueue.ERR_MQ_TIMEOUT) {
+			return "Heartbeat!";		
+		}
+
+		// Check if error reading the message queue
+		if (messageQueueState != NOERROR) {
+			logMessage("Unable to read command from the Domino message queue");
+			return "Quit!";				
+		}
+		
+		logDebug("User entered the command " + commandLine);
+
+		// Return the stripped command
+		return commandLine.toString().trim();
+	}
+		
+	/**
+	 * Return the debug state
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @return	Debug state 
+	 */
+	public final boolean getDebugState() {
+		return this.debugState;
+	}
 	
+	/**
+	 * Return the state of JAddinThread.
+	 *
+	 * @return	Status indicator (active or inactive)
+	 */
+	private final boolean isJAddinThreadAlive() {
+		
+		if ((this.jAddinThread != null) && (this.jAddinThread.isAlive()))
+			return true;
+		
+		this.jAddinThread = null;
+		return false;
+	}
+	
+	/**
+	 * Performs all necessary cleanup tasks
+	 */
+	private final void jAddinCleanup() {
+		
+		// Check if cleanup already done
+		if (this.jAddinCleanupDone)
+			return;
+		
+		logDebug("-- jAddinCleanup()");
+		
+		// Delete the Domino statistics
+		deleteDominoStatistic(this.userAddinName, this.STAT_OS_VERSION);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_VERSION);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB);
+		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME);
+		
+		// Wait for the user add-in to terminate
+		if (isJAddinThreadAlive()) {
+			logMessage("Waiting for " + this.userAddinName + " to terminate");
+			
+			// Wait until thread terminates
+			while (isJAddinThreadAlive())
+				waitMilliSeconds(125L);
+			
+			logDebug(this.userAddinName + " has terminated");
+		}
+		
+		try {
+			logDebug("Freeing the Domino resources");
+
+			// Delete the Domino task status line (Show Tasks)
+			deleteAddinStatusLine(this.dominoTaskID);
+			this.dominoTaskID = 0;
+			
+			// Close message queue
+			if (this.dominoMsgQueue != null) {
+				this.dominoMsgQueue.close(0);
+				this.dominoMsgQueue = null;	
+			}	
+		} catch (Exception e) {
+			logMessage("Unable to cleanup Domino resources: " + e.toString());
+		}
+		
+		this.jAddinCleanupDone = true;
+	}
+	
+	/**
+	 * Write a debug message to the Domino console. The message string will be prefixed with the add-in name
+	 * and the location in the source code issuing the call e.g. <code>"DEBUG: AddinName.MethodName(LineNumber): xxxxxxxx"</code>.
+	 * 
+	 * @param	message		Message to be displayed
+	 */
+	private final void logDebug(String message) {
+
+		if (debugState) {
+			logDebug(this.JADDIN_NAME, message);
+		}
+	}
+	
+	/**
+	 * Write a debug message to the Domino console. The message string will be prefixed with the add-in name
+	 * and the location in the source code issuing the call e.g. <code>"DEBUG: AddinName.MethodName(LineNumber): xxxxxxxx"</code>.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param 	addinName	Name of Add-in
+	 * @param	message		Message to be displayed
+	 */
+	public final synchronized void logDebug(String addinName, String message) {
+		
+		if (!this.debugState)
+			return;
+						
+		// Get thread name
+		String moduleInfo = addinName + '.';
+	
+		// Get method name and location from the Java calling stack
+		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+				    
+		if (stackTraceElements.length > 3)
+			moduleInfo += stackTraceElements[3].getMethodName() + '(' + stackTraceElements[3].getLineNumber() + ")" ;
+		else
+			moduleInfo += "N/A";
+		
+		// Format module information to fixed wide
+		while (moduleInfo.length() < 35)
+			moduleInfo += ' ';
+		
+		moduleInfo = moduleInfo.substring(0,  35);
+						
+		AddInLogMessageText("DEBUG: " + moduleInfo + ' ' + message, 0);
+	}
+	
+	/**
+	 * Write a log message to the Domino console. The message string will be prefixed with the add-in name
+	 * followed by a column, e.g. <code>"AddinName: xxxxxxxx"</code>
+	 * 
+	 * @param	message		Message to be displayed
+	 */
+	private final void logMessage(String message) {
+		AddInLogMessageText(this.JADDIN_NAME + ": " + message, 0);
+	}
+	
+	/**
+	 * Write a log message to the Domino console. The message string will be prefixed with the add-in name
+	 * followed by a column, e.g. <code>"AddinName: xxxxxxxx"</code>
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 * 
+	 * @param	addinName	Name of add-in
+	 * @param	message		Message to be displayed
+	 */
+	public final void logMessage(String addinName, String message) {
+		AddInLogMessageText(addinName + ": " + message, 0);
+	}
+
 	/**
 	 * This method is called by the Domino RunJava task as the main entry point.
  	 */
+	@Override
 	@SuppressWarnings("deprecation")
 	public final void runNotes() {
 	
@@ -93,7 +377,7 @@ public final class JAddin extends JavaServerAddin {
 				return;
 			}
 		} catch (Exception e) {
-			logMessage("Unable to detect the Java Virtual Machine version number: " + e.getMessage());
+			logMessage("Unable to detect the Java Virtual Machine version number: " + e.toString());
 			return;
 		}
 		*/
@@ -109,9 +393,9 @@ public final class JAddin extends JavaServerAddin {
 		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_VERSION, this.JADDIN_VERSION);
 		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE, this.JADDIN_DATE);
 		setDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION, System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB, new Double(Runtime.getRuntime().maxMemory() / 1024));
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, new Double((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024));
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, new Double(jvmGCCounter));
+		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB, ((double) Runtime.getRuntime().maxMemory()) / 1024);
+		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, ((double) Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024d);
+		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, ((double) jvmGCCounter));
 		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME, JAddin.toISODateUTC(new Date()));
 
 		// Create the status line showed in 'Show Task' console command
@@ -219,10 +503,7 @@ public final class JAddin extends JavaServerAddin {
 			classAddinInitialize.invoke(this.jAddinThread, new Object[] {this, this.userAddinParameter});
 			logDebug("<= " + this.userAddinName + ".addinInitialize()");
 		} catch (Exception e) {
-			logMessage("Unhandled exception in " + this.userAddinName + ".addinInitialize(): " + e.getMessage());
-			// Write the stack trace directly to the standard output
-			e.printStackTrace();
-			jAddinCleanup();
+			logMessage("Unhandled exception in " + this.userAddinName + ".addinInitialize(): " + e.toString());
 			return;
 		}
 		
@@ -232,10 +513,7 @@ public final class JAddin extends JavaServerAddin {
 			classStart.invoke(this.jAddinThread, new Object[] {});
 			logDebug("<= " + this.userAddinName + ".start()");
 		} catch (Exception e) {
-			logMessage("Unhandled exception in " + this.userAddinName + ".start(): " + e.getMessage());
-			// Write the stack trace directly to the standard output
-			e.printStackTrace();
-			jAddinCleanup();
+			logMessage("Unhandled exception in " + this.userAddinName + ".start(): " + e.toString());
 			return;
 		}
 	
@@ -285,10 +563,7 @@ public final class JAddin extends JavaServerAddin {
 						classAddinStop.invoke(this.jAddinThread, new Object[] {});
 						logDebug("<= " + this.userAddinName + ".addinStop()");
 					} catch (Exception e) {
-						logMessage("Unhandled exception in " + this.userAddinName + ".addinStop(): " + e.getMessage());
-						// Write the stack trace directly to the standard output
-						e.printStackTrace();
-						jAddinCleanup();
+						logMessage("Unhandled exception in " + this.userAddinName + ".addinStop(): " + e.toString());
 						break;
 					}
 				
@@ -298,10 +573,8 @@ public final class JAddin extends JavaServerAddin {
 						classAddinTerminate.invoke(this.jAddinThread, new Object[] {});
 						logDebug("<= JAddinThread.addinTerminate()");
 					} catch (Exception e) {
-						logMessage("Unhandled exception in JAddinThread.addinTerminate(): " + e.getMessage());
-						// Write the stack trace directly to the standard output
-						e.printStackTrace();
-						jAddinCleanup();
+						// 
+						logMessage("Unhandled exception in JAddinThread.addinTerminate(): " + e.toString());
 						break;
 					}
 								
@@ -311,10 +584,10 @@ public final class JAddin extends JavaServerAddin {
 						this.jAddinThread.interrupt();
 					}
 				
-					// Wait 3 second for thread termination
+					// Wait 5 second for thread termination
 					logDebug("Waiting for " + this.userAddinName + " termination");
 					
-					for (int index = 0; index < 12; index++) {
+					for (int index = 0; index < 20; index++) {
 	
 						if (!isJAddinThreadAlive()) {
 							logDebug(this.userAddinName + " has terminated");
@@ -324,10 +597,9 @@ public final class JAddin extends JavaServerAddin {
 						waitMilliSeconds(250L);
 					}
 						
-					// Kill the thread if still running (Not nice, but I don't know of any other way)
+					// The thread did not terminate itself - There is nothing we can do :(
 					if (isJAddinThreadAlive()) {
-						logDebug("Stopping " + this.userAddinName + " abnormally");
-						jAddinThread.stop();
+						logMessage("Error: The addin thread " + this.userAddinName + " could not be stopped. Please inform the author of this application.");
 					}
 					
 					// Terminate the main loop
@@ -389,7 +661,7 @@ public final class JAddin extends JavaServerAddin {
 						lowMemoryWarning = false;
 					
 					// Update statistics
-					setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, new Double(memoryUsed / 1024));
+					setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, ((double) memoryUsed) / 1024d);
 					
 					Calendar currentDate = Calendar.getInstance();
 	
@@ -402,7 +674,7 @@ public final class JAddin extends JavaServerAddin {
 							classAddinNextHour.invoke(this.jAddinThread, new Object[] {});
 							logDebug("<= " + this.userAddinName + ".addinNextHour()");
 						} catch (Exception e) {
-							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextHour(): " + e.getMessage());
+							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextHour(): " + e.toString());
 							// Write the stack trace directly to the standard output
 							e.printStackTrace();
 							jAddinCleanup();
@@ -421,7 +693,7 @@ public final class JAddin extends JavaServerAddin {
 							classAddinNextDay.invoke(this.jAddinThread, new Object[] {});
 							logDebug("<= " + this.userAddinName + ".addinNextDay()");
 						} catch (Exception e) {
-							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextDay(): " + e.getMessage());
+							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextDay(): " + e.toString());
 							// Write the stack trace directly to the standard output
 							e.printStackTrace();
 							jAddinCleanup();
@@ -445,7 +717,7 @@ public final class JAddin extends JavaServerAddin {
 						classAddinCommand.invoke(this.jAddinThread, new Object[] {new String(commandLine)});
 						logDebug("<= " + this.userAddinName + ".addinCommand()");
 					} catch (Exception e) {
-						logMessage("Unhandled exception in " + this.userAddinName + ".addinCommand(): " + e.getMessage());
+						logMessage("Unhandled exception in " + this.userAddinName + ".addinCommand(): " + e.toString());
 						// Write the stack trace directly to the standard output
 						e.printStackTrace();
 						jAddinCleanup();
@@ -463,77 +735,18 @@ public final class JAddin extends JavaServerAddin {
 		
 		// Make sure cleanup is done
 		jAddinCleanup();
-		
-		// Terminate main thread
-		return;
+	}
+
+	/**
+	 * Send Quit command to the Domino message queue to signal termination.
+	 * 
+	 * Note: This method is also called by the JAddinThread and the user add-in
+	 */
+	public final void sendQuitCommand() {
+		logDebug("Sending Quit command to Domino message queue");
+		this.dominoMsgQueue.putQuitMsg();
 	}
 	
-	/**
-	 * Return the state of JAddinThread.
-	 *
-	 * @return	Status indicator (active or inactive)
-	 */
-	private final boolean isJAddinThreadAlive() {
-		
-		if ((this.jAddinThread != null) && (this.jAddinThread.isAlive()))
-			return true;
-		
-		this.jAddinThread = null;
-		return false;
-	}
-
-	/**
-	 * Delay the execution of the current thread.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param	sleepTime	Delay time in milliseconds
-	 */
-	public final void waitMilliSeconds(long sleepTime) {
-		try {
-			Thread.sleep(sleepTime);
-		} catch (Exception e) {
-			logDebug("Method waitMilliSeconds(" + sleepTime + ") interrupted: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Create the Domino task status line which is shown in <code>"show tasks"</code> command.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param	name	Name of task
-	 * @return	Domino task ID
-	 */
-	public final int createAddinStatusLine(String name) {
-		return (AddInCreateStatusLine(name));
-	}
-
-	/**
-	 * Delete the Domino task status line.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param	id	Domino task id
-	 */
-	public final void deleteAddinStatusLine(int id) {
-		if (id != 0)
-			AddInDeleteStatusLine(id);
-	}
-
-	/**
-	 * Set the text of the add-in which is shown in command <code>"show tasks"</code>.
-	 * 
-	 * @param	text	Text to be set
-	 */
-	private final void setAddinState(String text) {
-		
-		if (this.dominoTaskID == 0)
-			return;
-		
-		AddInSetStatusLine(this.dominoTaskID, text);
-	}
-
 	/**
 	 * Set the text of the add-in which is shown in command <code>"show tasks"</code>.
 	 * 
@@ -551,41 +764,16 @@ public final class JAddin extends JavaServerAddin {
 	}
 
 	/**
-	 * Set the server statistic which is shown in command <code>"Show Stat"</code>.
+	 * Set the text of the add-in which is shown in command <code>"show tasks"</code>.
 	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param addinName		Name of statistics package
-	 * @param statsName		Name of statistics
-	 * @param text			Statistics string
+	 * @param	text	Text to be set
 	 */
-	public final void setDominoStatistic(String addinName, String statsName, String text) {
-		StatUpdate(addinName, statsName, JavaServerAddin.ST_UNIQUE, JavaServerAddin.VT_TEXT, text);
-	}
+	private final void setAddinState(String text) {
 		
-	/**
-	 * Set the server statistic which is shown in command <code>"Show Stat"</code>.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param addinName		Name of statistics package
-	 * @param statsName		Name of statistics
-	 * @param value			Statistics value
-	 */
-	public final void setDominoStatistic(String addinName, String statsName, Double value) {
-		StatUpdate(addinName, statsName, JavaServerAddin.ST_UNIQUE, JavaServerAddin.VT_NUMBER, value);
-	}
-	
-	/**
-	 * Delete the server statistic which is shown in command <code>"Show Stat"</code>.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param addinName		Name of statistics package
-	 * @param statsName		Name of statistics
-	 */
-	public final void deleteDominoStatistic(String addinName, String statsName) {
-		StatDelete(addinName, statsName);
+		if (this.dominoTaskID == 0)
+			return;
+		
+		AddInSetStatusLine(this.dominoTaskID, text);
 	}
 	
 	/**
@@ -600,262 +788,44 @@ public final class JAddin extends JavaServerAddin {
 	}
 	
 	/**
-	 * Return the debug state
+	 * Set the server statistic which is shown in command <code>"Show Stat"</code>.
 	 * 
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
-	 * @return	Debug state 
+	 * @param addinName		Name of statistics package
+	 * @param statsName		Name of statistics
+	 * @param value			Statistics value
 	 */
-	public final boolean getDebugState() {
-		return this.debugState;
+	public final void setDominoStatistic(String addinName, String statsName, Double value) {
+		StatUpdate(addinName, statsName, JavaServerAddin.ST_UNIQUE, JavaServerAddin.VT_NUMBER, value);
 	}
 	
 	/**
-	 * Wait for the next command from the Domino console and returns it.
+	 * Set the server statistic which is shown in command <code>"Show Stat"</code>.
 	 * 
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
-	 * @return	Entered command or "Quit!" (for "Quit", "Exit", Domino shutdown or errors).
+	 * @param addinName		Name of statistics package
+	 * @param statsName		Name of statistics
+	 * @param text			Statistics string
 	 */
-	final private String getCommand() {
-
-		StringBuffer commandLine = new StringBuffer(1024);
-		
-		// Get next command from the queue ('Tell <Addin> xxxxxxxx") or timeout after 15 seconds
-		int messageQueueState = this.dominoMsgQueue.get(commandLine, 1024, MessageQueue.MQ_WAIT_FOR_MSG, 15000);
-		
-		// Quit or Exit (implicit)
-		if (messageQueueState == MessageQueue.ERR_MQ_QUITTING) {
-			logDebug("User entered Quit, Exit or Domino shutdown is in progress");
-			return "Quit!";				
-		}
-
-		// Check if 15 seconds timeout - Return heartbeat request
-		if (messageQueueState == MessageQueue.ERR_MQ_TIMEOUT) {
-			return "Heartbeat!";		
-		}
-
-		// Check if error reading the message queue
-		if (messageQueueState != NOERROR) {
-			logMessage("Unable to read command from the Domino message queue");
-			return "Quit!";				
-		}
-		
-		logDebug("User entered the command " + commandLine);
-
-		// Return the stripped command
-		return commandLine.toString().trim();
-	}
-	
-	/**
-	 * Send Quit command to the Domino message queue to signal termination.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 */
-	public final void sendQuitCommand() {
-		logDebug("Sending Quit command to Domino message queue");
-		this.dominoMsgQueue.putQuitMsg();
-	}
-	
-	/**
-	 * Calls the Java virtual machines garbage collector.
-	 */
-	private final void callJavaGC() {
-		
-		logDebug("-- callJavaGC()");
-		
-		Runtime runtime = Runtime.getRuntime();
-
-		logDebug("Calling the Java virtual machine garbage collector");
-		long heapFreeMBStart = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
-		System.gc();
-		long heapFreeMBStop = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
-		
-		logMessage("JVM garbage collector reclaimed " + (heapFreeMBStop - heapFreeMBStart) + " KB memory");
-		
-		// Update Domino statistics
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, new Double(++jvmGCCounter));
+	public final void setDominoStatistic(String addinName, String statsName, String text) {
+		StatUpdate(addinName, statsName, JavaServerAddin.ST_UNIQUE, JavaServerAddin.VT_TEXT, text);
 	}
 
 	/**
-	 * Write a log message to the Domino console. The message string will be prefixed with the add-in name
-	 * followed by a column, e.g. <code>"AddinName: xxxxxxxx"</code>
-	 * 
-	 * @param	message		Message to be displayed
-	 */
-	private final void logMessage(String message) {
-		AddInLogMessageText(this.JADDIN_NAME + ": " + message, 0);
-	}
-
-	/**
-	 * Write a log message to the Domino console. The message string will be prefixed with the add-in name
-	 * followed by a column, e.g. <code>"AddinName: xxxxxxxx"</code>
+	 * Delay the execution of the current thread.
 	 * 
 	 * Note: This method is also called by the JAddinThread and the user add-in
 	 * 
-	 * @param	addinName	Name of add-in
-	 * @param	message		Message to be displayed
+	 * @param	sleepTime	Delay time in milliseconds
 	 */
-	public final void logMessage(String addinName, String message) {
-		AddInLogMessageText(addinName + ": " + message, 0);
-	}
-	
-	/**
-	 * Write a debug message to the Domino console. The message string will be prefixed with the add-in name
-	 * and the location in the source code issuing the call e.g. <code>"DEBUG: AddinName.MethodName(LineNumber): xxxxxxxx"</code>.
-	 * 
-	 * @param	message		Message to be displayed
-	 */
-	private final void logDebug(String message) {
-
-		if (!this.debugState)
-			return;
-		else	
-			logDebug(this.JADDIN_NAME, message);
-	}
-
-	/**
-	 * Write a debug message to the Domino console. The message string will be prefixed with the add-in name
-	 * and the location in the source code issuing the call e.g. <code>"DEBUG: AddinName.MethodName(LineNumber): xxxxxxxx"</code>.
-	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param 	addinName	Name of Add-in
-	 * @param	message		Message to be displayed
-	 */
-	public final synchronized void logDebug(String addinName, String message) {
-		
-		if (!this.debugState)
-			return;
-						
-		// Get thread name
-		String moduleInfo = addinName + '.';
-	
-		// Get method name and location from the Java calling stack
-		StackTraceElement stackTraceElements[] = Thread.currentThread().getStackTrace();
-				    
-		if (stackTraceElements.length > 3)
-			moduleInfo += stackTraceElements[3].getMethodName() + '(' + stackTraceElements[3].getLineNumber() + ")" ;
-		else
-			moduleInfo += "N/A";
-		
-		// Format module information to fixed wide
-		while (moduleInfo.length() < 35)
-			moduleInfo += ' ';
-		
-		moduleInfo = moduleInfo.substring(0,  35);
-						
-		AddInLogMessageText("DEBUG: " + moduleInfo + ' ' + message, 0);
-	}
-	
-	/**
-	 * Performs all necessary cleanup tasks
-	 */
-	private final void jAddinCleanup() {
-		
-		// Check if cleanup already done
-		if (this.jAddinCleanupDone)
-			return;
-		
-		logDebug("-- jAddinCleanup()");
-		
-		// Delete the Domino statistics
-		deleteDominoStatistic(this.userAddinName, this.STAT_OS_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME);
-		
-		// Wait for the user add-in to terminate
-		if (isJAddinThreadAlive()) {
-			logMessage("Waiting for " + this.userAddinName + " to terminate");
-			
-			// Wait until thread terminates
-			while (isJAddinThreadAlive())
-				waitMilliSeconds(125L);
-			
-			logDebug(this.userAddinName + " has terminated");
-		}
-		
+	public final void waitMilliSeconds(long sleepTime) {
 		try {
-			logDebug("Freeing the Domino resources");
-
-			// Delete the Domino task status line (Show Tasks)
-			deleteAddinStatusLine(this.dominoTaskID);
-			this.dominoTaskID = 0;
-			
-			// Close message queue
-			if (this.dominoMsgQueue != null) {
-				this.dominoMsgQueue.close(0);
-				this.dominoMsgQueue = null;	
-			}	
+			Thread.sleep(sleepTime);
 		} catch (Exception e) {
-			logMessage("Unable to cleanup Domino resources: " + e.getMessage());
+			logDebug("Method waitMilliSeconds(" + sleepTime + ") interrupted: " + e.toString());
+			Thread.currentThread().interrupt();
 		}
-		
-		this.jAddinCleanupDone = true;
-	}
-	
-	/**
-	 * This method is called by the Java runtime during garbage collection.
-	 */
-	public void finalize() {
-		
-		logDebug("-- finalize()");
-		
-		// Free all resources if necessary
-		jAddinCleanup();
-		
-		// Call the superclass method
-		super.finalize();
-	}
-	
-	/**
-	 * Convert Java Date to ISO 8601 UTC string
-	 *  
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param date Java Calendar object
-	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
-	 */
-	static final String toISODateUTC(Calendar date) {
-		return (toISODateUTC(date.getTime()));
-	}
-	
-	/**
-	 * Convert Java Date to ISO 8601 UTC string
-	 *  
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
-	 * @param date Java Date object
-	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
-	 */
-	static synchronized final String toISODateUTC(Date date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return (dateFormat.format(date));	
-	}
-
-	/**
-	 * Convert ISO 8601 date string to Java Date
-	 * 
-	 * @param isoDate Java Date object
-	 * @return Formatted date in ISO format ("yyyy-mm-ddThh:mm:ssZ")
-	 */
-	static final Calendar fromISODate(String isoDate) {
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		Calendar calendar = Calendar.getInstance();
-		
-		try {
-			calendar.setTime(dateFormat.parse(isoDate));
-		} catch (Exception e) {
-			return null;
-		}
-		return (calendar);
 	}
 }
