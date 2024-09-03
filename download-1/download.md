@@ -13,9 +13,15 @@ layout:
     visible: true
 ---
 
-# ⬇ Download
+# ⬇️ Download
 
 ## Downloads
+
+### Version 2.1.4 2024-09-03
+
+{% file src="../.gitbook/assets/JAddin-2.1.4.zip" %}
+
+* Support for JVM Java 21 (used in HCL Domino 14.5 and higher)
 
 ### Version 2.1.3 2023-09-11
 
