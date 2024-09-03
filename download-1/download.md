@@ -21,7 +21,7 @@ layout:
 
 {% file src="../.gitbook/assets/JAddin-2.1.4.zip" %}
 
-{% hint style="danger" %}
+{% hint style="warning" %}
 Make sure that the user thread _JAddinThread_ implements the _addinStop_() method to terminate itself. During termination or server shutdown, the main thread JAddin calls addinStop() and issues Thread.interrupt() if necessary. There is no "harder" way to kill the JAddinThread.
 {% endhint %}
 
