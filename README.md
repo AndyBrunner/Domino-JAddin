@@ -86,15 +86,7 @@ public class HelloWorld extends JAddinThread {
 ### **HCL Domino Console**
 
 ```
-> Load RunJava JAddin HelloWorld
-03.02.2019 09:31:47   JVM: Java Virtual Machine initialized.
-03.02.2019 09:31:47   RunJava: Started JAddin Java task.
-03.02.2019 09:31:47   HelloWorld: Started with parameters null
-03.02.2019 09:31:47   HelloWorld: Running on Release 10.0.1 November 29, 2018
-03.02.2019 09:31:47   HelloWorld: User code is executing...
-03.02.2019 09:32:02   HelloWorld: User code is executing...
-03.02.2019 09:32:17   HelloWorld: User code is executing...
-03.02.2019 09:32:32   HelloWorld: User code is executing...
+HelloWorld: Running on Release 10.0.1 November 29, 2018
 ```
 
 ### **Prerequisites**
