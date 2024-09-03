@@ -21,6 +21,10 @@ layout:
 
 {% file src="../.gitbook/assets/JAddin-2.1.4.zip" %}
 
+{% hint style="warning" %}
+Make sure that the user thread _JAddinThread_ implements the _addinStop_() method to terminate itself.
+{% endhint %}
+
 * Support for JVM Java 21 (used in HCL Domino 14.5 and higher)
 
 ### Version 2.1.3 2023-09-11
