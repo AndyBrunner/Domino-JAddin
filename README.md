@@ -21,7 +21,7 @@ layout:
 # JAddin for HCL Domino Java Framework (Freeware)
 
 {% hint style="success" %}
-**Support for HCL Domino 14.5 and higher is implemented in** [**JAddin 2.1.4**](download/download.md)
+**Support for HCL Domino 14.5 and higher (JVM with Java 21) is implemented in** [**JAddin 2.1.4**](download/download.md)
 {% endhint %}
 
 {% hint style="info" %}
