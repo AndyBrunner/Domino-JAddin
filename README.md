@@ -21,7 +21,7 @@ layout:
 # JAddin for HCL Domino Java Framework (Freeware)
 
 {% hint style="success" %}
-&#x20;**JAddin now supports HCL Domino 14.5 (EAP1)**
+&#x20;**JAddin currently supports HCL Domino 14.5**
 {% endhint %}
 
 {% hint style="info" %}
@@ -39,7 +39,7 @@ This tool is also shown on the [_HCL Domino Marketplace_](https://hclsofy.com/do
 {% hint style="success" %}
 **JAddin is fully compatible with HCL Domino 14**
 
-When JAddin is loaded, you will see the message _WARNING: A terminally deprecated method in java.lang.System has been called._ This is a normal message and can be ignored as written in the [HCL Domino Release Notes](https://help.hcltechsw.com/domino/14.0.0/admin/wn\_components\_no\_longer\_included\_in\_release.html).
+When JAddin is loaded, you will see the message _WARNING: A terminally deprecated method in java.lang.System has been called._ This is a normal message and can be ignored as written in the [HCL Domino Release Notes](https://help.hcltechsw.com/domino/14.0.0/admin/wn_components_no_longer_included_in_release.html).
 {% endhint %}
 
 ### **Code Example**
@@ -112,7 +112,7 @@ public class HelloWorld extends JAddinThread {
 
 ### Credits
 
-Photo by [Markus Spiske](https://unsplash.com/ja/@markusspiske?utm\_source=unsplash\&utm\_medium=referral\&utm\_content=creditCopyText) on [Unsplash](https://unsplash.com/de/s/fotos/java-programming?utm\_source=unsplash\&utm\_medium=referral\&utm\_content=creditCopyText)
+Photo by [Markus Spiske](https://unsplash.com/ja/@markusspiske?utm_source=unsplash\&utm_medium=referral\&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/de/s/fotos/java-programming?utm_source=unsplash\&utm_medium=referral\&utm_content=creditCopyText)
 
 ### **Author**
 
