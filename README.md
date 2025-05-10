@@ -26,21 +26,13 @@ layout:
 Follow development at Mastodon [#DominoJAddin](https://swiss.social/tags/dominojaddin)
 
 JAddin currently supports HCL Domino 14.5
+
+This tool is also shown on the [_HCL Domino Marketplace_](https://hclsofy.com/domino)
 {% endhint %}
 
 ## Introduction
 
 The free and open-source JAddin framework acts as a thin and easy to use layer between the HCL Domino RunJava task and your Java application code. It helps you to create Java server tasks by freeing you to learn all the HCL Domino add-in specifics, such as message queue handling, thread creation, communication with the console, resource cleanup, etc. It is written entirely in Java to support all HCL Domino versions and platforms (HCL Domino 9.0.1 FP8 and above).
-
-{% hint style="info" %}
-This tool is also shown on the [_HCL Domino Marketplace_](https://hclsofy.com/domino)
-{% endhint %}
-
-{% hint style="success" %}
-**JAddin is fully compatible with HCL Domino 14**
-
-When JAddin is loaded, you will see the message _WARNING: A terminally deprecated method in java.lang.System has been called._ This is a normal message and can be ignored as written in the [HCL Domino Release Notes](https://help.hcltechsw.com/domino/14.0.0/admin/wn_components_no_longer_included_in_release.html).
-{% endhint %}
 
 ### **Code Example**
 
