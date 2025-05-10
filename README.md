@@ -25,8 +25,6 @@ layout:
 {% hint style="info" %}
 Follow development at Mastodon [#DominoJAddin](https://swiss.social/tags/dominojaddin)
 
-JAddin currently supports HCL Domino 14.5
-
 This tool is also shown on the [_HCL Domino Marketplace_](https://hclsofy.com/domino)
 {% endhint %}
 
