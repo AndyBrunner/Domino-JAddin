@@ -20,12 +20,12 @@ layout:
 
 # JAddin for HCL Domino Java Framework (Freeware)
 
-{% hint style="success" %}
-&#x20;**JAddin currently supports HCL Domino 14.5**
-{% endhint %}
+<a href="download/download.md" class="button primary">Free Download</a>
 
 {% hint style="info" %}
 Follow development at Mastodon [#DominoJAddin](https://swiss.social/tags/dominojaddin)
+
+JAddin currently supports HCL Domino 14.5
 {% endhint %}
 
 ## Introduction
