@@ -82,19 +82,18 @@ public class HelloWorld extends JAddinThread {
 
 ```
 > Load RunJava JAddin HelloWorld
-03.09.2024 15:31:28   JVM: Java Virtual Machine initialized.
-03.09.2024 15:31:28   RunJava: Started JAddin Java task.
-03.09.2024 15:31:29   HelloWorld: Started with parameters null
-03.09.2024 15:31:29   HelloWorld: Running on Release 10.0.1 November 29, 2018
-03.09.2024 15:31:29   HelloWorld: User code is executing...
-03.09.2024 15:31:34   HelloWorld: User code is executing...
-03.09.2024 15:31:39   HelloWorld: User code is executing...
-03.09.2024 15:31:44   HelloWorld: User code is executing...
+15.06.2025 15:21:17   JVM: Java Virtual Machine initialized.
+15.06.2025 15:21:17   RunJava: Started JAddin Java task.
+15.06.2025 15:21:18   HelloWorld: Started with parameter: null
+15.06.2025 15:21:18   HelloWorld: Running on Release 14.0FP4 March 10, 2025
+15.06.2025 15:21:18   HelloWorld: User code is executing...
+15.06.2025 15:21:23   HelloWorld: User code is executing...
+15.06.2025 15:21:28   HelloWorld: User code is executing...
 > Tell HelloWorld Quit
-03.09.2024 15:31:53   HelloWorld: Termination in progress
-03.09.2024 15:31:53   HelloWorld: Terminated
-03.09.2024 15:31:55   RunJava: Finalized JAddin Java task.
-03.09.2024 15:31:56   RunJava shutdown.
+15.06.2025 15:21:35   HelloWorld: Termination in progress
+15.06.2025 15:21:36   HelloWorld: Terminated
+15.06.2025 15:21:38   RunJava: Finalized JAddin Java task.
+15.06.2025 15:21:39   RunJava shutdown.
 ```
 
 ### **Prerequisites**
