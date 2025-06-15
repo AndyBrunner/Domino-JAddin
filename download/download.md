@@ -17,7 +17,7 @@ layout:
 
 ## Downloads
 
-### In Development
+### Version 2.2.0 (In Development)
 
 * Optimize thread termination
 
