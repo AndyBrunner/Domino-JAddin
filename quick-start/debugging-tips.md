@@ -36,7 +36,6 @@ During execution, the JAddin maintains statistics and status information. They c
   HelloWorld.JAddin.StartedTime = 2019-02-03T08:31:47Z
   HelloWorld.JAddin.VersionDate = 2019-02-03
   HelloWorld.JAddin.VersionNumber = 2.1.0
-  HelloWorld.JVM.GCCount = 0
   HelloWorld.JVM.HeapLimitKB = 131'072
   HelloWorld.JVM.HeapUsedKB = 20'489
   HelloWorld.JVM.Version = 1.8.0_181 (IBM Corporation)
@@ -49,7 +48,6 @@ The framework supports a number of special commands:
 ```
 > Tell HelloWorld Help!
 03.02.2019 09:34:28   JAddin: Quit!       Terminate the add-in thru the framework
-03.02.2019 09:34:28   JAddin: GC!         Executes the Java Virtual Machine garbage collector
 03.02.2019 09:34:28   JAddin: Debug!      Enable the debug logging to the console
 03.02.2019 09:34:28   JAddin: NoDebug!    Disable the debug logging to the console
 03.02.2019 09:34:28   JAddin: Heartbeat!  Manually start heartbeat processing (automatically done every 15 seconds)
