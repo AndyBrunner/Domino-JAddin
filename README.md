@@ -38,13 +38,13 @@ The free and open-source JAddin framework acts as a thin and easy to use layer b
 public class HelloWorld extends JAddinThread {
 
 	// Declarations
-	boolean threadRunning = true;
+	boolean terminateThread = false;
 	
 	// This is the main entry point. When this method returns, the add-in terminates.
 	public void addinStart() {
 		
 		logMessage("Started with parameter: " + getAddinParameters());
-		
+
 		try {
 			logMessage("Running on " + dbGetSession().getNotesVersion());
 		} catch (Exception e) {
@@ -52,7 +52,7 @@ public class HelloWorld extends JAddinThread {
 		}
 		
 		// Stay in main loop until termination signal set by addinStop()
-		while (threadRunning) {
+		while (!terminateThread) {
 			logMessage("User code is executing...");
 			waitMilliSeconds(5000L);
 		}
@@ -67,7 +67,7 @@ public class HelloWorld extends JAddinThread {
 		logMessage("Termination in progress");
 		
 		// Signal addinStart method to terminate thread
-		threadRunning = false;
+		terminateThread = true;
 	}
 	
 	// This method is called by the JAddin framework for any console command entered.
@@ -82,18 +82,17 @@ public class HelloWorld extends JAddinThread {
 
 ```
 > Load RunJava JAddin HelloWorld
-15.06.2025 15:21:17   JVM: Java Virtual Machine initialized.
-15.06.2025 15:21:17   RunJava: Started JAddin Java task.
-15.06.2025 15:21:18   HelloWorld: Started with parameter: null
-15.06.2025 15:21:18   HelloWorld: Running on Release 14.0FP4 March 10, 2025
-15.06.2025 15:21:18   HelloWorld: User code is executing...
-15.06.2025 15:21:23   HelloWorld: User code is executing...
-15.06.2025 15:21:28   HelloWorld: User code is executing...
+16.06.2025 16:19:13   JVM: Java Virtual Machine initialized.
+16.06.2025 16:19:13   RunJava: Started JAddin Java task.
+16.06.2025 16:19:13   HelloWorld: Started with parameter: null
+16.06.2025 16:19:13   HelloWorld: Running on Release 14.0FP4 March 10, 2025
+16.06.2025 16:19:13   HelloWorld: User code is executing...
+16.06.2025 16:19:18   HelloWorld: User code is executing...
+16.06.2025 16:19:23   HelloWorld: User code is executing...
+16.06.2025 16:19:28   HelloWorld: User code is executing...
 > Tell HelloWorld Quit
-15.06.2025 15:21:35   HelloWorld: Termination in progress
-15.06.2025 15:21:36   HelloWorld: Terminated
-15.06.2025 15:21:38   RunJava: Finalized JAddin Java task.
-15.06.2025 15:21:39   RunJava shutdown.
+16.06.2025 16:19:34   HelloWorld: Termination in progress
+16.06.2025 16:19:35   HelloWorld: Terminated
 ```
 
 ### **Prerequisites**
