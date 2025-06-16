@@ -1,5 +1,3 @@
-// import java.net.URL;
-// import java.net.URLClassLoader;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
@@ -27,10 +25,9 @@ import lotus.domino.ViewEntryCollection;
  * JAddin. It establishes the JAddin user framework and calls the user code. The code running in this thread
  * should avoid any long-running or blocking code to prohibit delays in processing of the IBM Domino message queue.
  * 
- * @author	andy.brunner@abdata.ch
- * @version	2.1.4
+ * @author	andy.brunner@k43.ch
  * 
- * @see		<a href="https://jaddin.abdata.ch">Homepage of Domino-JAddin</a>
+ * @see		<a href="https://jaddin.k43.ch">Homepage of Domino-JAddin</a>
  */
 public abstract class JAddinThread extends NotesThread {
 	
@@ -56,13 +53,14 @@ public abstract class JAddinThread extends NotesThread {
 	 * This method performs all necessary cleanup tasks.
 	 */
 	private final void addinCleanup() {
-	
-		logDebug("-- addinCleanup()");
 		
 		// Check if cleanup already done
-		if (this.cleanupDone)
+		if (this.cleanupDone) {
 			return;
-				
+		}
+		
+		logDebug("Entered addinCleanup()");
+		
 		// Delete Domino statistics
 		if (isJAddinAlive()) {
 			deleteDominoStatistic(JAddinThread.STAT_DOMINO_VERSION);
@@ -75,8 +73,10 @@ public abstract class JAddinThread extends NotesThread {
 		this.dominoTaskID = 0;
 	
 		// Send Quit command to the Domino message queue to gracefully terminate the main thread
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.sendQuitCommand();
+			waitMilliSeconds(1000L);
+		}
 		
 		// Free the Domino session object
 		dbRecycleObjects(this.dominoSession);
@@ -91,7 +91,7 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param	command	Passed command line
 	 */
 	public void addinCommand(String command) {
-		logMessage("This add-in does not support any console commands except 'Quit'");
+		logMessage("This add-in does not support any commands except 'Quit'");
 	}
 	
 	/**
@@ -107,26 +107,25 @@ public abstract class JAddinThread extends NotesThread {
 		this.startArguments	= args;
 		this.userAddinName	= this.getClass().getName();
 
-		logDebug("-- addinInitialize()");
+		logDebug("Entered addinInitialize()");
 		
 		// Set the thread name (default would be is "Thread-x")
 		setName(this.userAddinName);
 
 		// Create the status line showed in 'Show Task' command
-		if (isJAddinAlive())
-			this.dominoTaskID = jAddin.createAddinStatusLine(jAddin.JADDIN_NAME + " " + this.userAddinName);
+		if (isJAddinAlive()) {
+			this.dominoTaskID = jAddin.createAddinStatusLine(JAddin.JADDIN_NAME + " " + this.userAddinName);
+		}
 		
 		// Set the initial state
 		setAddinState("Executing addinInitialize() method");
 
 		// Create Domino session
 		try {
-			logDebug("Creating the Domino session");
 			this.dominoSession = NotesFactory.createSession();
 
 			// Set initial Domino statistic
 			setDominoStatistic(JAddinThread.STAT_DOMINO_VERSION, dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
-			
 			logDebug("Domino version: " + dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
 			
 		} catch (NotesException e) {
@@ -154,21 +153,10 @@ public abstract class JAddinThread extends NotesThread {
 
 	/**
 	 * This method is executed when the command "Quit" or "Exit" is entered or during Domino server shutdown. After this
-	 * method returns, the add-in will be terminated.
+	 * method returns, the add-in must terminate immediately.
 	 */
 	public abstract void addinStop();
 	
-	/**
-	 * Terminate the current add-in
-	 */
-	public final void addinTerminate() {
-		
-		logDebug("-- addinTerminate()");
-		
-		// Terminate the thread
-		immediateTermination();
-	}
-
 	/**
 	 * Get all documents or documents matching a key from a view.
 	 * 
@@ -394,7 +382,13 @@ public abstract class JAddinThread extends NotesThread {
 
 		try {
 			// Open Domino database
-			db = dbGetSession().getDatabase(null, dbName);
+			Session session = dbGetSession();
+			
+			if (session == null) {
+				return null;
+			}
+			
+			db = session.getDatabase(null, dbName);
 			
 			// Return null if any error
 			if (db == null)
@@ -404,6 +398,7 @@ public abstract class JAddinThread extends NotesThread {
 				dbRecycleObjects(db);
 				return null;
 			}
+			
 		} catch (Exception e) {
 			logDebug("Domino database " + dbName + " open failed: " + e.getMessage());
 			this.dbLastErrorMessage = e.getMessage();
@@ -707,8 +702,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param statsName		Name of statistics
 	 */
 	public final void deleteDominoStatistic(String statsName) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.deleteDominoStatistic(this.userAddinName, statsName);
+		}
 	}
 	
 	/**
@@ -789,19 +785,12 @@ public abstract class JAddinThread extends NotesThread {
 	 * @return	Status of debug logging
 	 */
 	public final boolean getDebugState() {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			return (jAddin.getDebugState());
-		else
-			return (false);
-	}
-	
-	/**
-	 * Immediately terminate the thread.
-	 */
-	private void immediateTermination() {
-
-		// Cleanup the resources
-		addinCleanup();
+		}
+		else {
+			return false;
+		}
 	}
 
 	/**
@@ -820,10 +809,11 @@ public abstract class JAddinThread extends NotesThread {
 			return false;
 			
 		try {
-			if (db.isOpen())
+			if (db.isOpen()) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 			
 		} catch (Exception e) {
 			logDebug("Unable to check for open Domino database: " + e.getMessage());
@@ -839,8 +829,9 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final boolean isJAddinAlive() {
 		
-		if ((this.jAddin != null) && (this.jAddin.isAlive()))
+		if ((this.jAddin != null) && (this.jAddin.isAlive())) {
 			return true;
+		}
 
 		this.jAddin = null;
 		return false;
@@ -866,8 +857,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param 	message		Message to be displayed
 	 */
 	public final void logMessage(String message) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.logMessage(this.userAddinName, message);
+		}
 	}
 		
 	/**
@@ -877,7 +869,7 @@ public abstract class JAddinThread extends NotesThread {
 	@Override
 	public final void runNotes() {
 		
-		logDebug("-- runNotes()");
+		logDebug("Entered runNotes()");
 		
 		// Check if addinInitialize() has failed
 		if (this.startupError) {
@@ -890,9 +882,8 @@ public abstract class JAddinThread extends NotesThread {
 		
 		// Call the user main method addinStart()
 		try {
-			logDebug("=> " + this.userAddinName + ".addinStart()");
+			logDebug("Calling " + this.userAddinName + ".addinStart()");
 			addinStart();
-			logDebug("<= " + this.userAddinName + ".addinStart()");
 		} catch (Exception e) {
 			// Write the stack trace directly to the standard output
 			e.printStackTrace();
@@ -910,8 +901,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param 	message		Status message
 	 */
 	public final void setAddinState(String message) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.setAddinState(this.dominoTaskID, message);
+		}
 	}
 	
 	/**
@@ -920,8 +912,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param	debugState	Debug state 
 	 */
 	public final void setDebugState(boolean debugState) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.setDebugState(debugState);
+		}
 	}
 	
 	/**
@@ -931,8 +924,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param value			Statistics value
 	 */
 	public final void setDominoStatistic(String statsName, Double value) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.setDominoStatistic(this.userAddinName, statsName, value);
+		}
 	}
 		
 	/**
@@ -942,8 +936,9 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param text			Statistics text
 	 */
 	public final void setDominoStatistic(String statsName, String text) {
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.setDominoStatistic(this.userAddinName, statsName, text);
+		}
 	}
 
 	/**
@@ -969,12 +964,8 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void waitMilliSeconds(long waitTime) {
 		
-		if (isJAddinAlive())
+		if (isJAddinAlive()) {
 			jAddin.waitMilliSeconds(waitTime);
-		else {
-			logMessage("Unable to delay execution of thread: Main thread is not running");
-			// Terminate the thread
-			immediateTermination();
 		}
 	}
 }

@@ -1,20 +1,21 @@
 public class HelloWorld extends JAddinThread {
 
 	// Declarations
-	boolean threadRunning = true;
+	boolean terminateThread = false;
 	
 	// This is the main entry point. When this method returns, the add-in terminates.
 	public void addinStart() {
 		
-		logMessage("Started with parameters " + getAddinParameters());
-		
+		logMessage("Started with parameter: " + getAddinParameters());
+
 		try {
 			logMessage("Running on " + dbGetSession().getNotesVersion());
 		} catch (Exception e) {
 			logMessage("Unable to get Domino version: " + e.getMessage());
 		}
-		// Main add-in loop
-		while (threadRunning) {
+		
+		// Stay in main loop until termination signal set by addinStop()
+		while (!terminateThread) {
 			logMessage("User code is executing...");
 			waitMilliSeconds(5000L);
 		}
@@ -29,12 +30,12 @@ public class HelloWorld extends JAddinThread {
 		logMessage("Termination in progress");
 		
 		// Signal addinStart method to terminate thread
-		threadRunning = false;
+		terminateThread = true;
 	}
 	
 	// This method is called by the JAddin framework for any console command entered.
 	@Override
 	public void addinCommand(String command) {
-		logMessage("You have entered the command " + command);
+		logMessage("You have entered the command: " + command);
 	}
 }

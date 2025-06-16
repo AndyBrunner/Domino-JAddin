@@ -15,27 +15,25 @@ import lotus.notes.internal.MessageQueue;
  * 			delays in processing the HCL Domino message queue. Some of the methods in this class are also
  * 			called by the JAddinThread and the user add-in class.
  * 
- * @author	andy.brunner@abdata.ch
- * @version	2.1.4
+ * @author	andy.brunner@k43.ch
  * 
  * @see		<a href="https://jaddin.k43.ch">Homepage of Domino-JAddin</a>
  */
 public final class JAddin extends JavaServerAddin {
 	
 	// Constants
-	final String			JADDIN_NAME				= "JAddin";
-	final String			JADDIN_VERSION			= "2.1.4";			// Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			JADDIN_DATE				= "2024-09-03";		// Always keep up with the README.md, DOWNLOAD.md and class comments
-	final String			STAT_OS_VERSION			= "Domino.Platform";
-	final String			STAT_JVM_VERSION		= "JVM.Version";
-	final String			STAT_JVM_HEAPDEFINEDKB	= "JVM.HeapLimitKB";
-	final String			STAT_JVM_HEAPUSEDKB		= "JVM.HeapUsedKB";
-	final String			STAT_JVM_GCCount		= "JVM.GCCount";
-		
-	final String			STAT_JADDIN_VERSION		= JADDIN_NAME + ".VersionNumber";
-	final String			STAT_JADDIN_DATE		= JADDIN_NAME + ".VersionDate";
-	final String			STAT_JADDIN_STARTTIME	= JADDIN_NAME + ".StartedTime";
+	static final String		JADDIN_NAME				= "JAddin";
+	static final String		JADDIN_VERSION			= "2.2.0";			// Always keep up with the README.md, DOWNLOAD.md and class comments
+	static final String		JADDIN_DATE				= "2025-06-16";		// Always keep up with the README.md, DOWNLOAD.md and class comments
+	static final String		STAT_OS_VERSION			= "Domino.Platform";
+	static final String		STAT_JVM_VERSION		= "JVM.Version";
 	
+	static final String		STAT_JVM_HEAPDEFINEDKB	= "JVM.HeapLimitKB";
+	static final String		STAT_JVM_HEAPUSEDKB		= "JVM.HeapUsedKB";
+	static final String		STAT_JADDIN_VERSION		= JADDIN_NAME + ".VersionNumber";
+	static final String		STAT_JADDIN_DATE		= JADDIN_NAME + ".VersionDate";
+	static final String		STAT_JADDIN_STARTTIME	= JADDIN_NAME + ".StartedTime";
+
 	// Instance variables
 	private JAddinThread	jAddinThread			= null;
 	private String[]		jAddinArgs				= null;
@@ -44,13 +42,9 @@ public final class JAddin extends JavaServerAddin {
 	private MessageQueue	dominoMsgQueue			= null;
 	private int 			dominoTaskID			= 0;
 	private boolean			jAddinCleanupDone		= false;
-	
 	private boolean			startupError			= false;
-		
 	private boolean			debugState				= false;
-	
-	private int				jvmGCCounter			= 0;
-	
+		
 	/**
 	 * Convert ISO 8601 date string to Java Date
 	 * 
@@ -94,15 +88,12 @@ public final class JAddin extends JavaServerAddin {
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return (dateFormat.format(date));	
 	}
-	
 
-	
 	/**
 	 * This constructor is called by the HCL Domino RunJava task if no arguments are specified.
 	 * (<code>"Load RunJava JAddin"</code>).
 	 */
 	public JAddin() {
-		logMessage("Missing required parameter <AddinName>");
 		logMessage("Usage: 'Load RunJava JAddin <AddinName> [AddinParameters]'");
 		this.startupError = true;
 	}
@@ -118,25 +109,23 @@ public final class JAddin extends JavaServerAddin {
 	}
 
 	/**
-	 * Calls the Java virtual machines garbage collector.
+	 * Check JVM heap space
 	 */
-	private final void callJavaGC() {
+	private void checkHeapSpace() {
+	
+		Runtime	runtime				= Runtime.getRuntime();
+		long	memoryMax			= runtime.maxMemory();
+		long	memoryUsed			= runtime.totalMemory() - runtime.freeMemory();
+		long	memoryUsedPercent	= Math.round((memoryUsed * 100.0) / memoryMax);
 		
-		logDebug("-- callJavaGC()");
-		
-		Runtime runtime = Runtime.getRuntime();
+		if (memoryUsedPercent > 90) {
+			logMessage("Warning: Java heap space is " + memoryUsedPercent + "%% used. Consider allocating more memory thru Notes.Ini variable 'JavaMaxHeapSize='");
+		}
 
-		logDebug("Calling the Java virtual machine garbage collector");
-		long heapFreeMBStart = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
-		System.gc();
-		long heapFreeMBStop = (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) / 1024);
-		
-		logMessage("JVM garbage collector reclaimed " + (heapFreeMBStop - heapFreeMBStart) + " KB memory");
-		
-		// Update Domino statistics
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, ((double) ++jvmGCCounter));
+		// Update statistics
+		setDominoStatistic(this.userAddinName, STAT_JVM_HEAPUSEDKB, (double) Math.round(memoryUsed / 1024));
 	}
-
+	
 	/**
 	 * Create the Domino task status line which is shown in <code>"show tasks"</code> command.
 	 * 
@@ -157,8 +146,9 @@ public final class JAddin extends JavaServerAddin {
 	 * @param	id	Domino task id
 	 */
 	public final void deleteAddinStatusLine(int id) {
-		if (id != 0)
+		if (id != 0) {
 			AddInDeleteStatusLine(id);
+		}
 	}
 
 	/**
@@ -176,11 +166,9 @@ public final class JAddin extends JavaServerAddin {
 	/**
 	 * Wait for the next command from the Domino console and returns it.
 	 * 
-	 * Note: This method is also called by the JAddinThread and the user add-in
-	 * 
 	 * @return	Entered command or "Quit!" (for "Quit", "Exit", Domino shutdown or errors).
 	 */
-	final private String getCommand() {
+	private final String getCommand() {
 
 		StringBuffer commandLine = new StringBuffer(1024);
 		
@@ -189,7 +177,7 @@ public final class JAddin extends JavaServerAddin {
 		
 		// Quit or Exit (implicit)
 		if (messageQueueState == MessageQueue.ERR_MQ_QUITTING) {
-			logDebug("User entered Quit, Exit or Domino shutdown is in progress");
+			logDebug("Termination in progress");
 			return "Quit!";				
 		}
 
@@ -200,14 +188,16 @@ public final class JAddin extends JavaServerAddin {
 
 		// Check if error reading the message queue
 		if (messageQueueState != NOERROR) {
-			logMessage("Unable to read command from the Domino message queue");
+			logMessage("Error reading from the Domino message queue");
 			return "Quit!";				
 		}
 		
-		logDebug("User entered the command " + commandLine);
+		String command = commandLine.toString().trim();
+		
+		logDebug("Domino message queue command: " + command);
 
 		// Return the stripped command
-		return commandLine.toString().trim();
+		return command;
 	}
 		
 	/**
@@ -228,8 +218,9 @@ public final class JAddin extends JavaServerAddin {
 	 */
 	private final boolean isJAddinThreadAlive() {
 		
-		if ((this.jAddinThread != null) && (this.jAddinThread.isAlive()))
+		if ((this.jAddinThread != null) && this.jAddinThread.isAlive()) {
 			return true;
+		}
 		
 		this.jAddinThread = null;
 		return false;
@@ -241,20 +232,20 @@ public final class JAddin extends JavaServerAddin {
 	private final void jAddinCleanup() {
 		
 		// Check if cleanup already done
-		if (this.jAddinCleanupDone)
+		if (this.jAddinCleanupDone) {
 			return;
+		}
 		
-		logDebug("-- jAddinCleanup()");
+		logDebug("Entered jAddinCleanup()");
 		
 		// Delete the Domino statistics
-		deleteDominoStatistic(this.userAddinName, this.STAT_OS_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB);
-		deleteDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME);
+		deleteDominoStatistic(this.userAddinName, STAT_OS_VERSION);
+		deleteDominoStatistic(this.userAddinName, STAT_JADDIN_VERSION);
+		deleteDominoStatistic(this.userAddinName, STAT_JADDIN_DATE);
+		deleteDominoStatistic(this.userAddinName, STAT_JVM_VERSION);
+		deleteDominoStatistic(this.userAddinName, STAT_JVM_HEAPDEFINEDKB);
+		deleteDominoStatistic(this.userAddinName, STAT_JVM_HEAPUSEDKB);
+		deleteDominoStatistic(this.userAddinName, STAT_JADDIN_STARTTIME);
 		
 		// Wait for the user add-in to terminate
 		if (isJAddinThreadAlive()) {
@@ -295,7 +286,7 @@ public final class JAddin extends JavaServerAddin {
 	private final void logDebug(String message) {
 
 		if (debugState) {
-			logDebug(this.JADDIN_NAME, message);
+			logDebug(JADDIN_NAME, message);
 		}
 	}
 	
@@ -312,25 +303,28 @@ public final class JAddin extends JavaServerAddin {
 		
 		if (!this.debugState)
 			return;
-						
+		
 		// Get thread name
-		String moduleInfo = addinName + '.';
-	
+		StringBuilder moduleInfo = new StringBuilder(addinName).append('.');
+		
 		// Get method name and location from the Java calling stack
 		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-				    
-		if (stackTraceElements.length > 3)
-			moduleInfo += stackTraceElements[3].getMethodName() + '(' + stackTraceElements[3].getLineNumber() + ")" ;
-		else
-			moduleInfo += "N/A";
-		
+						    
+		if (stackTraceElements.length > 3) {
+			moduleInfo.append(stackTraceElements[3].getMethodName())
+				.append('(')
+				.append(stackTraceElements[3].getLineNumber())
+				.append(')');
+		} else {
+			moduleInfo.append("N/A");
+		}
+				
 		// Format module information to fixed wide
-		while (moduleInfo.length() < 35)
-			moduleInfo += ' ';
-		
-		moduleInfo = moduleInfo.substring(0,  35);
-						
-		AddInLogMessageText("DEBUG: " + moduleInfo + ' ' + message, 0);
+		while (moduleInfo.length() < 35) {
+			moduleInfo.append(' ');
+		}
+				
+		AddInLogMessageText("DEBUG: " + moduleInfo.substring(0,  35) + ' ' + message, 0);
 	}
 	
 	/**
@@ -340,7 +334,7 @@ public final class JAddin extends JavaServerAddin {
 	 * @param	message		Message to be displayed
 	 */
 	private final void logMessage(String message) {
-		AddInLogMessageText(this.JADDIN_NAME + ": " + message, 0);
+		AddInLogMessageText(JADDIN_NAME + ": " + message, 0);
 	}
 	
 	/**
@@ -367,39 +361,26 @@ public final class JAddin extends JavaServerAddin {
 		if (this.startupError)
 			return;
 
-		/* V 2.1.3 Remove JVM version check
-		// First test if the JVM meets the minimum requirement
-		try {
-			String jvmVersion = System.getProperty("java.specification.version", "0");
-
-			if (Double.parseDouble(jvmVersion) < 1.8) {
-				logMessage("Current Java Virtual Machine version " + jvmVersion + " must be 1.8 or higher");
-				return;
-			}
-		} catch (Exception e) {
-			logMessage("Unable to detect the Java Virtual Machine version number: " + e.toString());
-			return;
-		}
-		*/
-		
 		// Set the Java thread name to the class name (default would be "Thread-n")
-		setName(this.JADDIN_NAME);
+		setName(JADDIN_NAME);
 		
 		// Extract the user add-in name (1st parameter)
 		this.userAddinName = this.jAddinArgs[0];
 
 		// Set initial Domino statistics
-		setDominoStatistic(this.userAddinName, this.STAT_OS_VERSION, System.getProperty("os.version", "n/a") + " (" + System.getProperty("os.name", "n/a") + ")");
-		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_VERSION, this.JADDIN_VERSION);
-		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_DATE, this.JADDIN_DATE);
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_VERSION, System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPDEFINEDKB, ((double) Runtime.getRuntime().maxMemory()) / 1024);
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, ((double) Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024d);
-		setDominoStatistic(this.userAddinName, this.STAT_JVM_GCCount, ((double) jvmGCCounter));
-		setDominoStatistic(this.userAddinName, this.STAT_JADDIN_STARTTIME, JAddin.toISODateUTC(new Date()));
+		setDominoStatistic(this.userAddinName, STAT_OS_VERSION, System.getProperty("os.version", "n/a") + " (" + System.getProperty("os.name", "n/a") + ")");
+		setDominoStatistic(this.userAddinName, STAT_JADDIN_VERSION, JADDIN_VERSION);
+		setDominoStatistic(this.userAddinName, STAT_JADDIN_DATE, JADDIN_DATE);
+		setDominoStatistic(this.userAddinName, STAT_JVM_VERSION, System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
+		setDominoStatistic(this.userAddinName, STAT_JVM_HEAPDEFINEDKB, ((double) Runtime.getRuntime().maxMemory()) / 1024);
+		setDominoStatistic(this.userAddinName, STAT_JVM_HEAPUSEDKB, (double) Math.round((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024d));
+		setDominoStatistic(this.userAddinName, STAT_JADDIN_STARTTIME, JAddin.toISODateUTC(new Date()));
 
+		// Check heap space
+		checkHeapSpace();
+		
 		// Create the status line showed in 'Show Task' console command
-		this.dominoTaskID = createAddinStatusLine(this.JADDIN_NAME + " Main Task");
+		this.dominoTaskID = createAddinStatusLine(JADDIN_NAME + " Main Task");
 		
 		// Set the initial state
 		setAddinState("Initialization in progress");
@@ -414,7 +395,12 @@ public final class JAddin extends JavaServerAddin {
 				switch ((this.jAddinArgs[index].toLowerCase())) {
 					case "debug!": {
 						setDebugState(true);
-						logMessage("Debug logging enabled - Enter 'Tell " + userAddinName + " NoDebug!' to disable");
+						logMessage("Enter 'Tell " + userAddinName + " NoDebug!' to disable debug logging");
+						continue;
+					}
+					case "nodebug!": {
+						setDebugState(false);
+						logMessage("Enter 'Tell " + userAddinName + " Debug!' to enable debug logging");
 						continue;
 					}
 					default: {
@@ -433,13 +419,13 @@ public final class JAddin extends JavaServerAddin {
 				this.userAddinParameter = null;
 		}
 	
-		logDebug(this.JADDIN_NAME + " framework version " + this.JADDIN_VERSION);
+		logDebug(JADDIN_NAME + " framework version " + JADDIN_VERSION);
 		logDebug("OS platform: " + System.getProperty("os.version", "n/a") + " (" + System.getProperty("os.name", "n/a") + ")");
 		logDebug("JVM version: " + System.getProperty("java.version", "n/a") + " (" + System.getProperty("java.vendor", "n/a") + ")");
-		logDebug(this.userAddinName + " will be called with parameters " + this.userAddinParameter);
+		logDebug(this.userAddinName + " will be called with parameter: " + this.userAddinParameter);
 		
 		// Create and open the message queue
-		logDebug("Creating the Domino message queue");
+		logDebug("Creating and opening the Domino message queue");
 
 		String messageQueueName	= MSG_Q_PREFIX + this.userAddinName.toUpperCase();
 		this.dominoMsgQueue = new MessageQueue();
@@ -457,7 +443,6 @@ public final class JAddin extends JavaServerAddin {
 			return;
 		}
 		
-		logDebug("Opening the Domino message queue");
 		if (this.dominoMsgQueue.open(messageQueueName, 0) != NOERROR) {
 			logMessage("Unable to open Domino message queue");
 			jAddinCleanup();
@@ -467,7 +452,6 @@ public final class JAddin extends JavaServerAddin {
 		// Dynamically load the class specified in the start parameter, e.g. "Load RunJava JAddin HelloWorld".
 		Class<?>	classClass				= null;
 		Method		classAddinInitialize	= null;
-		Method		classAddinTerminate		= null;
 		Method		classStart				= null;
 		Method		classAddinStop			= null;
 		Method		classAddinCommand		= null;
@@ -475,19 +459,16 @@ public final class JAddin extends JavaServerAddin {
 		Method		classAddinNextHour		= null;
 
 		try {
-			logDebug("Loading the user Java class " + this.userAddinName);
+			logDebug("Loading Java class " + this.userAddinName);
 
 			classClass				= Class.forName(this.userAddinName);
 			this.jAddinThread		= (JAddinThread) classClass.newInstance();
 			classAddinInitialize	= classClass.getMethod("addinInitialize", new Class[] {JAddin.class, String.class});
 			classStart				= classClass.getMethod("start", new Class[] {});
 			classAddinStop			= classClass.getMethod("addinStop", new Class[] {});
-			classAddinTerminate		= classClass.getMethod("addinTerminate", new Class[] {});
 			classAddinCommand		= classClass.getMethod("addinCommand", new Class[] {String.class});
 			classAddinNextHour		= classClass.getMethod("addinNextHour", new Class[] {});
 			classAddinNextDay		= classClass.getMethod("addinNextDay", new Class[] {});
-
-			logDebug("User Java class " + this.userAddinName + " successfully loaded");
 		}
 		catch (Exception e)
 		{
@@ -499,21 +480,21 @@ public final class JAddin extends JavaServerAddin {
 
 		// Call the addInInitialize(this, arguments) method
 		try {
-			logDebug("=> " + this.userAddinName + ".addinInitialize()");
+			logDebug("Calling " + this.userAddinName + ".addinInitialize()");
 			classAddinInitialize.invoke(this.jAddinThread, new Object[] {this, this.userAddinParameter});
-			logDebug("<= " + this.userAddinName + ".addinInitialize()");
 		} catch (Exception e) {
 			logMessage("Unhandled exception in " + this.userAddinName + ".addinInitialize(): " + e.toString());
+			jAddinCleanup();
 			return;
 		}
 		
 		// Call the start() method (part of JavaServerAddin) which will then call runNotes()
 		try {
-			logDebug("=> " + this.userAddinName + ".start()");
+			logDebug("Calling " + this.userAddinName + ".start()");
 			classStart.invoke(this.jAddinThread, new Object[] {});
-			logDebug("<= " + this.userAddinName + ".start()");
 		} catch (Exception e) {
 			logMessage("Unhandled exception in " + this.userAddinName + ".start(): " + e.toString());
+			jAddinCleanup();
 			return;
 		}
 	
@@ -521,32 +502,24 @@ public final class JAddin extends JavaServerAddin {
 		// Main loop (Waiting and processing the commands from the message queue)
 		//
 		String		commandLine			= null;
-		Runtime		runtime				= Runtime.getRuntime();
 		Calendar	lastDate			= Calendar.getInstance();
-		Boolean		lowMemoryWarning	= false;
 		
 		while (true) {
-
-			setAddinState("Idle");
 			
 			// Wait for next command on the Domino message queue
+			setAddinState("Idle");
 			commandLine = getCommand();
-			
 			setAddinState("Processing command " + commandLine);
 			
 			switch (commandLine.toLowerCase()) {
 				
 				// Check if command "Help!" entered
 				case "help!": {
-					
 					logMessage("Quit!       Terminate the add-in thru the framework");
-					logMessage("GC!         Executes the Java Virtual Machine garbage collector");
 					logMessage("Debug!      Enable the debug logging to the console");
 					logMessage("NoDebug!    Disable the debug logging to the console");
 					logMessage("Heartbeat!  Manually start heartbeat processing (automatically done every 15 seconds)");
 					logMessage("Help!       Displays this help text");
-					
-					// Wait for next command from queue
 					continue;
 				}
 
@@ -555,62 +528,55 @@ public final class JAddin extends JavaServerAddin {
 
 					setAddinState("Termination in progress");
 				
-					logDebug(this.JADDIN_NAME + " termination in progress");
+					logDebug(JADDIN_NAME + " termination in progress");
 				
 					// Call the user addInStop() method
-					try {
-						logDebug("=> " + this.userAddinName + ".addinStop()");
-						classAddinStop.invoke(this.jAddinThread, new Object[] {});
-						logDebug("<= " + this.userAddinName + ".addinStop()");
-					} catch (Exception e) {
-						logMessage("Unhandled exception in " + this.userAddinName + ".addinStop(): " + e.toString());
-						break;
+					if (isJAddinThreadAlive()) {
+						try {
+							logDebug("Calling " + this.userAddinName + ".addinStop()");
+							classAddinStop.invoke(this.jAddinThread, new Object[] {});
+							waitMilliSeconds(1000L);
+						} catch (Exception e) {
+							logMessage("Unhandled exception in " + this.userAddinName + ".addinStop(): " + e.toString());
+							jAddinCleanup();
+							break;
+						}
 					}
 				
-					// Call the JAddinThread addInTerminate() method
-					try {
-						logDebug("=> JAddinThread.addinTerminate()");
-						classAddinTerminate.invoke(this.jAddinThread, new Object[] {});
-						logDebug("<= JAddinThread.addinTerminate()");
-					} catch (Exception e) {
-						// 
-						logMessage("Unhandled exception in JAddinThread.addinTerminate(): " + e.toString());
-						break;
-					}
-								
-					// Try to interrupt the thread
+					// Try to stop the thread thru interrupt
 					if (isJAddinThreadAlive()) {
 						logDebug("Sending interrupt to " + this.userAddinName);
 						this.jAddinThread.interrupt();
+						waitMilliSeconds(250L);
+						
+						// Wait 5 seconds for thread termination
+						logDebug("Waiting for " + this.userAddinName + " termination");
+						
+						for (int index = 0; index < 20; index++) {
+		
+							if (!isJAddinThreadAlive()) {
+								logDebug(this.userAddinName + " has terminated");
+								break;
+							}
+									
+							waitMilliSeconds(250L);
+						}
 					}
 				
-					// Wait 5 second for thread termination
-					logDebug("Waiting for " + this.userAddinName + " termination");
-					
-					for (int index = 0; index < 20; index++) {
-	
-						if (!isJAddinThreadAlive()) {
-							logDebug(this.userAddinName + " has terminated");
-							break;
-						}
-								
-						waitMilliSeconds(250L);
-					}
-						
 					// The thread did not terminate itself - There is nothing we can do :(
 					if (isJAddinThreadAlive()) {
-						logMessage("Error: The addin thread " + this.userAddinName + " could not be stopped. Please inform the author of this application.");
+						logMessage("Error: The addin thread " + this.userAddinName + " could not be stopped");
 					}
 					
 					// Terminate the main loop
+					jAddinCleanup();
 					break;
 				}
 
 				// Check if command "Debug!" entered
 				case "debug!": {
 					setDebugState(true);
-					logMessage("Debug logging enabled - Enter 'Tell " + this.userAddinName + " NoDebug!' to disable");
-					// Wait for next command from queue
+					logMessage("Debug logging enabled");
 					continue;
 				}
 			
@@ -618,14 +584,6 @@ public final class JAddin extends JavaServerAddin {
 				case "nodebug!": {
 					setDebugState(false);
 					logMessage("Debug logging disabled");
-					// Wait for next command from queue
-					continue;
-				}
-
-				// Check if command "GC!" entered
-				case "gc!": {
-					callJavaGC();
-					// Wait for next command from queue
 					continue;
 				}
 			
@@ -634,71 +592,54 @@ public final class JAddin extends JavaServerAddin {
 
 					setAddinState("Performing heartbeat processing");
 	
-					// Check if the thread has completed
+					//
+					// Check if user thread has terminated
+					//
 					if (!isJAddinThreadAlive()) {
 						logMessage("Abnormal completion of " + this.userAddinName + " detected");
 						jAddinCleanup();
-						
-						// Terminate the main loop
 						break;
 					}
 					
+					//
 					// Check if JVM heap space too small
-					long	memoryMax			= runtime.maxMemory();
-					long	memoryUsed			= runtime.totalMemory() - runtime.freeMemory();
-					long	memoryFree			= memoryMax - memoryUsed;
-					double	memoryUsedPercent	= (memoryUsed * 100.0) / memoryMax;
-					
-					if (memoryUsedPercent > 90.0) {
-						// Show warning message once for each threshold reached
-						if (!lowMemoryWarning) {
-							logMessage("Free Java heap space is below 10 percent (" + (memoryFree / 1024) + " KB free)");
-							logMessage("Consider allocating more memory thru Notes.Ini variable 'JavaMaxHeapSize=xxxxMB'");
-							lowMemoryWarning = true;
-						}
-						callJavaGC();
-					} else
-						lowMemoryWarning = false;
-					
-					// Update statistics
-					setDominoStatistic(this.userAddinName, this.STAT_JVM_HEAPUSEDKB, ((double) memoryUsed) / 1024d);
-					
-					Calendar currentDate = Calendar.getInstance();
+					//
+					checkHeapSpace();
 	
+					//
 					// Check if next hour
+					//
+					Calendar currentDate = Calendar.getInstance();
+
 					if (currentDate.get(Calendar.HOUR_OF_DAY) != lastDate.get(Calendar.HOUR_OF_DAY)) {
 	
 						// Call the user addinNextHour() method
 						try {
-							logDebug("=> " + this.userAddinName + ".addinNextHour()");
+							logDebug("Calling " + this.userAddinName + ".addinNextHour()");
 							classAddinNextHour.invoke(this.jAddinThread, new Object[] {});
-							logDebug("<= " + this.userAddinName + ".addinNextHour()");
 						} catch (Exception e) {
 							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextHour(): " + e.toString());
 							// Write the stack trace directly to the standard output
 							e.printStackTrace();
 							jAddinCleanup();
-							
-							// Terminate the main loop
 							break;
 						}
 					}
 					
+					//
 					// Check if next day
+					//
 					if (currentDate.get(Calendar.DAY_OF_MONTH) != lastDate.get(Calendar.DAY_OF_MONTH)) {
 
 						// Call the user addinNextDay() method
 						try {
-							logDebug("=> " + this.userAddinName + ".addinNextDay()");
+							logDebug("Calling " + this.userAddinName + ".addinNextDay()");
 							classAddinNextDay.invoke(this.jAddinThread, new Object[] {});
-							logDebug("<= " + this.userAddinName + ".addinNextDay()");
 						} catch (Exception e) {
 							logMessage("Unhandled exception in " + this.userAddinName + ".addinNextDay(): " + e.toString());
 							// Write the stack trace directly to the standard output
 							e.printStackTrace();
 							jAddinCleanup();
-							
-							// Terminate the main loop
 							break;
 						}
 					}
@@ -713,9 +654,8 @@ public final class JAddin extends JavaServerAddin {
 
 					// Call the user method addinCommand(command) to process the command
 					try {
-						logDebug("=> " + this.userAddinName + ".addinCommand()");
+						logDebug("Calling " + this.userAddinName + ".addinCommand()");
 						classAddinCommand.invoke(this.jAddinThread, new Object[] {new String(commandLine)});
-						logDebug("<= " + this.userAddinName + ".addinCommand()");
 					} catch (Exception e) {
 						logMessage("Unhandled exception in " + this.userAddinName + ".addinCommand(): " + e.toString());
 						// Write the stack trace directly to the standard output
@@ -733,7 +673,9 @@ public final class JAddin extends JavaServerAddin {
 			break;
 		}
 		
-		// Make sure cleanup is done
+		//
+		// Terminate the main thread
+		//
 		jAddinCleanup();
 	}
 
