@@ -20,13 +20,15 @@ layout:
 ### Version 2.2.0 (In Development)
 
 * Optimize thread termination
+* Removed command 'gc!'
+* Added warning message if Java heap size is >90% used
 
 ### Version 2.1.4 2024-09-03
 
 {% file src="../.gitbook/assets/JAddin-2.1.4.zip" %}
 
 {% hint style="warning" %}
-Make sure that the user thread _JAddinThread_ implements the _addinStop_() method with some way to terminate itself. During termination or server shutdown, the main thread _JAddin_ calls _addinStop_() and issues _Thread.interrupt_() if necessary. There is no "harder" way to stop or kill the _JAddinThread_. The Domino server may not terminate normally if any threads are still active.
+Make sure that _JAddinThread_ implements the _addinStop_() method with some way to terminate itself. During termination or server shutdown, the main thread _JAddin_ calls _addinStop_() and issues _Thread.interrupt_() if necessary. There is no "harder" way to stop or kill the _JAddinThread_. The Domino server may not terminate normally if some threads are still active in the background.
 {% endhint %}
 
 * Support for JVM Java 17 (used in HCL Domino 14.5 and higher)
