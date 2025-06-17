@@ -18,7 +18,7 @@ layout:
     visible: true
 ---
 
-# JAddin for HCL Domino Java Framework (Freeware)
+# JAddin Java Framework for HCL Domino (Open Source)
 
 <a href="download/download.md" class="button primary">Free Download</a>
 
@@ -30,7 +30,7 @@ This tool is also shown on the [_HCL Domino Marketplace_](https://hclsofy.com/do
 
 ## Introduction
 
-The free and open-source JAddin framework acts as a thin and easy to use layer between the HCL Domino RunJava task and your Java application code. It helps you to create Java server tasks by freeing you to learn all the HCL Domino add-in specifics, such as message queue handling, thread creation, communication with the console, resource cleanup, etc. It is written entirely in Java to support all HCL Domino versions and platforms (HCL Domino 9.0.1 FP8 and above).
+The open-source JAddin framework acts as a thin and easy to use layer between the HCL Domino RunJava task and your Java application code. It helps you to create Java server tasks by freeing you to learn all the HCL Domino add-in specifics, such as message queue handling, thread creation, communication with the console, resource cleanup, etc. It is written entirely in Java to support all HCL Domino versions and platforms (HCL Domino 9.0.1 FP8 and above).
 
 ### **Code Example**
 
