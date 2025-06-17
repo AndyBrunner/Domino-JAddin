@@ -24,7 +24,6 @@ layout:
 * Optimize thread termination and Domino resource cleanup
 * Removed command 'gc!'
 * Added warning message if Java heap size is >90% used
-* Overall code changes
 
 ### Version 2.1.4 2024-09-03
 
