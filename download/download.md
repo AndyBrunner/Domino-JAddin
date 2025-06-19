@@ -17,6 +17,10 @@ layout:
 
 ## Downloads
 
+### Version (In Development)
+
+* Added _addinInterrupted()_ to check if main task JAddin requests shutdown (see example code)
+
 ### Version 2.2.0 2025-06-16
 
 {% file src="../.gitbook/assets/JAddin-2.2.0.zip" %}
