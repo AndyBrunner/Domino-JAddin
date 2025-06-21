@@ -19,7 +19,7 @@ layout:
 
 The JAddin architecture consists of two Java classes which are distributed with your application code. An picture of the architecture can be downloaded here:
 
-{% file src="../.gitbook/assets/JAddin Architecture.pdf" %}
+<figure><img src="../.gitbook/assets/JAddin-Architecture.png" alt=""><figcaption></figcaption></figure>
 
 ### **JAddin.class**
 
