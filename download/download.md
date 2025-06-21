@@ -34,7 +34,7 @@ layout:
 {% file src="../.gitbook/assets/JAddin-2.1.4.zip" %}
 
 {% hint style="warning" %}
-Make sure that _JAddinThread_ implements the _addinStop_() method with some way to terminate itself. During termination or server shutdown, the main thread _JAddin_ calls _addinStop_() and issues _Thread.interrupt_() if necessary. There is no "harder" way to stop or kill the _JAddinThread_. The Domino server may not terminate normally if some threads are still active in the background.
+Starting with version 2.1.4, the addinStop() method must be implemented to ensure proper termination of the add-in. During shutdown—either triggered by the server or manually—the main JAddin thread invokes addinStop() and, if necessary, issues a Thread.interrupt() to stop running threads. Note that the Domino server may not shut down cleanly if background threads remain active.
 {% endhint %}
 
 * Support for JVM Java 17 (used in HCL Domino 14.5 and higher)

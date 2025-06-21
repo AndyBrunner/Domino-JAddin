@@ -13,7 +13,7 @@ layout:
     visible: true
 ---
 
-# ℹ Architecture
+# ℹ️ Architecture
 
 ## Framework Architecture <a href="#id-1-framework-architecture" id="id-1-framework-architecture"></a>
 
@@ -29,10 +29,10 @@ Main functions of JAddin thread:
 
 * Initialize the JAddin framework
 * Dynamically loads and starts the user add-in as a subclass of JAddinThread
-* Monitors the Java heap space usage and calls the garbage collector if needed
+* Monitors the Java heap space
 * Acts on special framework commands (see command `Help!`)
 * Supports internal debugging thru `Debug!` command
-* Backcalls the user implemented methods `addInXXX()` (see below)
+* Backcalls the user methods `addInXXX()` (see below)
 
 ### **JAddinThread.class**
 
@@ -44,13 +44,14 @@ This abstract class must be implemented by the user add-in class. It runs as a s
 
 ### **AddinName.class**
 
-The user code runs in this subclass of JAddinThread and does all the processing of the application. Several callback methods are invoked from the framework which can or must be implemented by the user class. When the user class terminates, the framework will perform its cleanup and terminates the JAddin main thread.
+The user code runs within a subclass of JAddinThread and handles all application-specific processing. The framework invokes several callback methods that can or must be implemented by the user class. When the user class completes execution, the framework performs the necessary cleanup and terminates the main JAddin thread.
 
-| **Method**      | **Required** | **Description**                          |
-| --------------- | ------------ | ---------------------------------------- |
-| addinStart()    | Yes          | Main entry point of the application code |
-| addinCommand()  | No           | Called for any console command entered   |
-| addinStop()     | Yes          | Called before termination                |
-| addinNextHour() | No           | Called at each new hour                  |
-| addinNextDay()  | No           | Called at each new day                   |
+| **Method**         | **Required** | **Description**                                       |
+| ------------------ | ------------ | ----------------------------------------------------- |
+| addinStart()       | Yes          | Main entry point of the application code              |
+| addinInterrupted() | No           | Returns true if main thread issued Thread.interrupt() |
+| addinCommand()     | No           | Called for any console command entered                |
+| addinStop()        | Yes          | Called before termination                             |
+| addinNextHour()    | No           | Called at each new hour                               |
+| addinNextDay()     | No           | Called at each new day                                |
 

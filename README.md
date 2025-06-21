@@ -105,10 +105,10 @@ Photo by [Markus Spiske](https://unsplash.com/ja/@markusspiske?utm_source=unspla
 
 ### **Author**
 
-This framework was created to help implementing projects which required the use of HCL Domino server add-ins. If you encounter any issue or if you have a suggestion, please let me know.
+This framework was created to support projects that require the use of HCL Domino server add-ins. If you encounter any issues or have suggestions for improvement, please feel free to reach out.
 
 You may contact me thru my email address [andy.brunner@k43.ch](mailto:andy.brunner@k43.ch).
 
 ### **Unlicense (see** [**Wikipedia:Unlicense**](https://en.wikipedia.org/wiki/Unlicense)**)**
 
-> Created with love and passion in the beautiful country of 🇨🇭 Switzerland. This software shall be used for Good not Evil. As far as I know, no animal was harmed in the making of this software 😊
+> Created with love and passion in the beautiful country of 🇨🇭 Switzerland. This software is intended to be used for good—not evil. And to the best of my knowledge, no animals were harmed in its creation. 😊

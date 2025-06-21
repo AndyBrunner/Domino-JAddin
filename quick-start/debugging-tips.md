@@ -121,10 +121,10 @@ The debug output is written to the HCL Domino console and includes the name of t
 ## Frequently Asked Questions <a href="#id-6-frequently-asked-questions" id="id-6-frequently-asked-questions"></a>
 
 **Q: How do I develop my JAddin project in Eclipse?**\
-A: Make sure you include the two JAddin framework class files and the `notes.jar` file (installed with HCL Notes or HCL Domino) as external files in your Eclipse project.
+A: Ensure that you include the two JAddin framework class files and the notes.jar file (installed with HCL Notes or HCL Domino) as external libraries in your Eclipse project.
 
-**Q: What is the heartbeart in JAddin?**\
-A: The main thread in JAddin gets triggered every 15 seconds to perform some internal housekeeping tasks. One of these checks makes sure that the Java heap space does not get filled up to avoid out-of-memory errors. If the free space falls below 10 percent, the Java virtual machine garbage collector is invoked and a message is written to the console (see Notes.ini parameter `JavaMaxHeapSize`).
+**Q: What is the heartbeat in JAddin?**\
+A: The main thread in JAddin is triggered every 15 seconds to perform internal housekeeping tasks. One of these tasks monitors Java heap usage to help prevent out-of-memory errors. It also checks whether the user thread has terminated unexpectedly.
 
-**Q: I have copied a new version of my add-in to the server, but it does not get active during application startup.**\
-A: The RunJava task caches the Java classes in use. You must terminate all other RunJava tasks - and therefore terminate RunJava itself - to be able to force the reloading of your class file.
+**Q: I have copied a new version of my add-in to the server, but it does not become active during application startup. Why?**\
+A: The RunJava task caches Java classes in memory. To reload your updated class file, you must terminate all other RunJava tasks—effectively stopping RunJava itself—before restarting it.
