@@ -63,13 +63,13 @@ Copy the JAR container to the `domino/ndext` directory. This directory is automa
 
 There are several ways to start the application:
 
-### **Option 1: Program Document**
+#### **Option 1: Program Document**
 
 The easiest and recommended way is to add a program document in the HCL Domino directory.
 
 ![Sample Program Document](../.gitbook/assets/JAddin-Program-Document.png)
 
-### **Option 2: Console Command**
+#### **Option 2: Console Command**
 
 Enter the command `Load RunJava JAddin AddinName` in the HCL Domino console.
 
@@ -85,7 +85,7 @@ Enter the command `Load RunJava JAddin AddinName` in the HCL Domino console.
 03.02.2019 09:32:32   HelloWorld: User code is executing...
 ```
 
-### **Option 3: Notes.ini**
+#### **Option 3: Notes.ini**
 
 You may change the line starting with `ServerTask=` to include the task to be started, e.g.
 
