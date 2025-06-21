@@ -75,14 +75,18 @@ Enter the command `Load RunJava JAddin AddinName` in the HCL Domino console.
 
 ```
 > Load RunJava JAddin HelloWorld
-03.02.2019 09:31:47   JVM: Java Virtual Machine initialized.
-03.02.2019 09:31:47   RunJava: Started JAddin Java task.
-03.02.2019 09:31:47   HelloWorld: Started with parameters null
-03.02.2019 09:31:47   HelloWorld: Running on Release 10.0.1 November 29, 2018
-03.02.2019 09:31:47   HelloWorld: User code is executing...
-03.02.2019 09:32:02   HelloWorld: User code is executing...
-03.02.2019 09:32:17   HelloWorld: User code is executing...
-03.02.2019 09:32:32   HelloWorld: User code is executing...
+21.06.2025 14:01:26   JVM: Java Virtual Machine initialized.
+21.06.2025 14:01:26   RunJava: Started JAddin Java task.
+21.06.2025 14:01:26   HelloWorld: Started
+21.06.2025 14:01:26   HelloWorld: User code is executing...
+21.06.2025 14:01:31   HelloWorld: User code is executing...
+21.06.2025 14:01:36   HelloWorld: User code is executing...
+21.06.2025 14:01:41   HelloWorld: User code is executing...
+> Tell HelloWorld Quit
+21.06.2025 14:01:50   HelloWorld: Termination in progress
+21.06.2025 14:01:51   HelloWorld: Terminated
+21.06.2025 14:01:53   RunJava: Finalized JAddin Java task.
+21.06.2025 14:01:54   RunJava shutdown.
 ```
 
 #### **Option 3: Notes.ini**
