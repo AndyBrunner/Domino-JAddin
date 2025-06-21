@@ -35,14 +35,14 @@ public abstract class JAddinThread extends NotesThread {
 	static final String	STAT_DOMINO_VERSION = "Domino.Version";
 	
 	// Instance variables
-	private JAddin		jAddin				= null;
-	private String		startArguments		= null;
-	private String		userAddinName		= null;
-	private Session		dominoSession		= null;
-	private int			dominoTaskID		= 0;
-	private	boolean		startupError		= false;
-	private	boolean		cleanupDone			= false;
-	private String		dbLastErrorMessage	= null;
+	private JAddin		gJAddinMain			= null;
+	private String		gStartArguments		= null;
+	private String		gUserAddinName		= null;
+	private Session		gDominoSession		= null;
+	private int			gDominoTaskID		= 0;
+	private	boolean		gStartupError		= false;
+	private	boolean		gCleanupDone		= false;
+	private String		gDBLastErrorMessage	= null;
 
 	/** Dummy constructor
 	 */
@@ -55,7 +55,7 @@ public abstract class JAddinThread extends NotesThread {
 	private final void addinCleanup() {
 		
 		// Check if cleanup already done
-		if (this.cleanupDone) {
+		if (gCleanupDone) {
 			return;
 		}
 		
@@ -68,21 +68,19 @@ public abstract class JAddinThread extends NotesThread {
 		
 		// Delete the Domino task status line (Show Tasks)
 		if (isJAddinAlive()) {
-			jAddin.deleteAddinStatusLine(this.dominoTaskID);
+			gJAddinMain.deleteAddinStatusLine(gDominoTaskID);
 		}
-		this.dominoTaskID = 0;
+		gDominoTaskID = 0;
 	
 		// Send Quit command to the Domino message queue to gracefully terminate the main thread
 		if (isJAddinAlive()) {
-			jAddin.sendQuitCommand();
-			waitMilliSeconds(1000L);
+			gJAddinMain.sendQuitCommand();
 		}
 		
 		// Free the Domino session object
-		dbRecycleObjects(this.dominoSession);
-		this.dominoSession = null;
-		
-		this.cleanupDone = true;
+		dbRecycleObjects(gDominoSession);
+		gDominoSession	= null;
+		gCleanupDone	= true;
 	}
 
 	/**
@@ -103,18 +101,18 @@ public abstract class JAddinThread extends NotesThread {
 	public final void addinInitialize(JAddin mainThread, String args) {
 		
 		// Do some initializations
-		this.jAddin			= mainThread;
-		this.startArguments	= args;
-		this.userAddinName	= this.getClass().getName();
+		gJAddinMain			= mainThread;
+		gStartArguments		= args;
+		gUserAddinName		= this.getClass().getName();
 
 		logDebug("Entered addinInitialize()");
 		
 		// Set the thread name (default would be is "Thread-x")
-		setName(this.userAddinName);
+		setName(gUserAddinName);
 
 		// Create the status line showed in 'Show Task' command
 		if (isJAddinAlive()) {
-			this.dominoTaskID = jAddin.createAddinStatusLine(JAddin.JADDIN_NAME + " " + this.userAddinName);
+			gDominoTaskID = gJAddinMain.createAddinStatusLine(JAddin.JADDIN_NAME + " " + gUserAddinName);
 		}
 		
 		// Set the initial state
@@ -122,18 +120,27 @@ public abstract class JAddinThread extends NotesThread {
 
 		// Create Domino session
 		try {
-			this.dominoSession = NotesFactory.createSession();
+			gDominoSession = NotesFactory.createSession();
 
 			// Set initial Domino statistic
-			setDominoStatistic(JAddinThread.STAT_DOMINO_VERSION, dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
-			logDebug("Domino version: " + dominoSession.getNotesVersion().trim() + " (" + dominoSession.getPlatform() + ')');
+			setDominoStatistic(JAddinThread.STAT_DOMINO_VERSION, gDominoSession.getNotesVersion().trim() + " (" + gDominoSession.getPlatform() + ')');
+			logDebug("Domino version: " + gDominoSession.getNotesVersion().trim() + " (" + gDominoSession.getPlatform() + ')');
 			
 		} catch (NotesException e) {
 			logMessage("Unable to create Domino session object: " + e.text);
-			this.startupError = true;
+			gStartupError = true;
 		}
 	}
 
+	/**
+	 * Check if addin was interrupted by JAddin main thread.
+	 * 
+	 * @return True (of JAddin issued interrupt), false otherwise
+	 */
+	public final boolean addinInterrupted() {
+		return Thread.currentThread().isInterrupted();
+	}
+	
 	/**
 	 * This method is called at the beginning of every new day.
 	 */
@@ -168,7 +175,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final Vector<Document> dbGetAllDocuments(Database db, String viewName, String key) {
 		
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		Vector<Document> documentVector	= new Vector<Document>(0, 1);
 		
@@ -245,7 +252,7 @@ public abstract class JAddinThread extends NotesThread {
 
 			documentVector.removeAllElements();
 			
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return (documentVector);
 		}
 	}
@@ -260,7 +267,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final String dbGetDocumentItem(Document document, String itemName) {
 		
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments
 		if ((document == null) || !(document instanceof Document)) 
@@ -283,7 +290,7 @@ public abstract class JAddinThread extends NotesThread {
 			
 		} catch (Exception e) {
 			logDebug("Unable to read document item: " + e.getMessage());
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return null;
 		}
 	}
@@ -294,7 +301,7 @@ public abstract class JAddinThread extends NotesThread {
 	 * @return String	Error message
 	 */
 	public final String dbGetLastErrorMessage() {
-		return (this.dbLastErrorMessage);
+		return (gDBLastErrorMessage);
 	}
 	
 	/**
@@ -303,7 +310,7 @@ public abstract class JAddinThread extends NotesThread {
 	 * @return	Session		Domino session object
 	 */
 	public final lotus.domino.Session dbGetSession() {
-		return this.dominoSession;
+		return gDominoSession;
 	}
 
 	/**
@@ -317,7 +324,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final Document dbGetSingleDocumentByKey(Database db, String viewName, String key) {
 
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments
 		if ((db == null) || !(db instanceof Database)) 
@@ -358,7 +365,7 @@ public abstract class JAddinThread extends NotesThread {
 		} catch (Exception e) {
 			logDebug("Unable to read view " + dominoDbName + '/' + viewName + ": " + e.getMessage());
 			dbRecycleObjects(dominoView);
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return null;
 		}
 	}
@@ -372,7 +379,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final Database dbOpen(String dbName) {
 		
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 		
 		// Check argument
 		if ((dbName == null) || (dbName.length() == 0))
@@ -401,7 +408,7 @@ public abstract class JAddinThread extends NotesThread {
 			
 		} catch (Exception e) {
 			logDebug("Domino database " + dbName + " open failed: " + e.getMessage());
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			dbRecycleObjects(db);
 			return null;
 		}
@@ -419,7 +426,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final boolean dbRecycleObjects(Object... dominoObjects) {
 	
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		boolean returnFlag = true;
 		
@@ -448,7 +455,7 @@ public abstract class JAddinThread extends NotesThread {
 						((Base) object).recycle();
 					} catch (NotesException e) {
 						logMessage("Unable to recycle Domino object: " + e.text);
-						this.dbLastErrorMessage = e.text;
+						gDBLastErrorMessage = e.text;
 						returnFlag = false;
 					}
 				}
@@ -468,7 +475,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final boolean dbSaveDocument(Document document) {
 
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments
 		if ((document == null) || !(document instanceof Document)) 
@@ -478,7 +485,7 @@ public abstract class JAddinThread extends NotesThread {
 			return document.save(true);
 		} catch (Exception e) {
 			logDebug("Unable to save Domino document: " + e.getMessage());
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return false;
 		}
 	}
@@ -515,7 +522,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final boolean dbSendMessage(String principal, String from, String replyTo, String to, String cc, String bcc, String subject, String contentType, byte[] body) {
 		
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments and set defaults
 		if ((principal != null) && (principal.length() == 0))
@@ -629,7 +636,7 @@ public abstract class JAddinThread extends NotesThread {
 			
 		} catch (NotesException e) {
 			logMessage("Unable to create mail document in router mail box: " + e.text);
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			dbRecycleObjects(dominoDateTime, dominoMIMEEntity, dominoStream, mailDocument, dominoMailBox);
 			return false;
 		}
@@ -646,7 +653,7 @@ public abstract class JAddinThread extends NotesThread {
 	public final boolean dbSetDocumentItem(Document document, String itemName, Object data) {
 
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments
 		if ((document == null) || !(document instanceof Document)) 
@@ -659,7 +666,7 @@ public abstract class JAddinThread extends NotesThread {
 			document.replaceItemValue(itemName, data);				
 		} catch (Exception e) {
 			logDebug("Unable to set value in item " + itemName + ": " + e.getMessage());
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return false;
 		}
 		
@@ -703,7 +710,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void deleteDominoStatistic(String statsName) {
 		if (isJAddinAlive()) {
-			jAddin.deleteDominoStatistic(this.userAddinName, statsName);
+			gJAddinMain.deleteDominoStatistic(gUserAddinName, statsName);
 		}
 	}
 	
@@ -776,7 +783,7 @@ public abstract class JAddinThread extends NotesThread {
 	 * @return	Arguments passed to this add-in or null
 	 */
 	public final String getAddinParameters() {
-		return this.startArguments;
+		return gStartArguments;
 	}
 	
 	/**
@@ -786,7 +793,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final boolean getDebugState() {
 		if (isJAddinAlive()) {
-			return (jAddin.getDebugState());
+			return (gJAddinMain.getDebugState());
 		}
 		else {
 			return false;
@@ -802,22 +809,18 @@ public abstract class JAddinThread extends NotesThread {
 	public final boolean isDbOpen(Database db) {
 		
 		// Initialize
-		this.dbLastErrorMessage = null;
+		gDBLastErrorMessage = null;
 
 		// Check arguments
-		if ((db == null) || !(db instanceof Database)) 
+		if (!(db instanceof Database)) {
 			return false;
+		}
 			
 		try {
-			if (db.isOpen()) {
-				return true;
-			} else {
-				return false;
-			}
-			
+			return db.isOpen();
 		} catch (Exception e) {
 			logDebug("Unable to check for open Domino database: " + e.getMessage());
-			this.dbLastErrorMessage = e.getMessage();
+			gDBLastErrorMessage = e.getMessage();
 			return false;
 		}
 	}
@@ -829,12 +832,12 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final boolean isJAddinAlive() {
 		
-		if ((this.jAddin != null) && (this.jAddin.isAlive())) {
+		if ((gJAddinMain != null) && gJAddinMain.isAlive()) {
 			return true;
+		} else {
+			gJAddinMain = null;
+			return false;
 		}
-
-		this.jAddin = null;
-		return false;
 	}
 	
 	/**
@@ -845,8 +848,8 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void logDebug(String message) {
 		
-		if (isJAddinAlive() && jAddin.getDebugState()) {
-			jAddin.logDebug(this.userAddinName, message);
+		if (isJAddinAlive() && gJAddinMain.getDebugState()) {
+			gJAddinMain.logDebug(gUserAddinName, message);
 		}
 	}
 	
@@ -858,7 +861,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void logMessage(String message) {
 		if (isJAddinAlive()) {
-			jAddin.logMessage(this.userAddinName, message);
+			gJAddinMain.logMessage(gUserAddinName, message);
 		}
 	}
 		
@@ -872,7 +875,7 @@ public abstract class JAddinThread extends NotesThread {
 		logDebug("Entered runNotes()");
 		
 		// Check if addinInitialize() has failed
-		if (this.startupError) {
+		if (gStartupError) {
 			addinCleanup();
 			return;
 		}
@@ -882,13 +885,11 @@ public abstract class JAddinThread extends NotesThread {
 		
 		// Call the user main method addinStart()
 		try {
-			logDebug("Calling " + this.userAddinName + ".addinStart()");
+			logDebug("Calling " + gUserAddinName + ".addinStart()");
 			addinStart();
 		} catch (Exception e) {
 			// Write the stack trace directly to the standard output
 			e.printStackTrace();
-			addinCleanup();
-			return;
 		}
 				
 		// Cleanup the resources
@@ -902,7 +903,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void setAddinState(String message) {
 		if (isJAddinAlive()) {
-			jAddin.setAddinState(this.dominoTaskID, message);
+			gJAddinMain.setAddinState(gDominoTaskID, message);
 		}
 	}
 	
@@ -913,7 +914,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void setDebugState(boolean debugState) {
 		if (isJAddinAlive()) {
-			jAddin.setDebugState(debugState);
+			gJAddinMain.setDebugState(debugState);
 		}
 	}
 	
@@ -925,7 +926,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void setDominoStatistic(String statsName, Double value) {
 		if (isJAddinAlive()) {
-			jAddin.setDominoStatistic(this.userAddinName, statsName, value);
+			gJAddinMain.setDominoStatistic(gUserAddinName, statsName, value);
 		}
 	}
 		
@@ -937,7 +938,7 @@ public abstract class JAddinThread extends NotesThread {
 	 */
 	public final void setDominoStatistic(String statsName, String text) {
 		if (isJAddinAlive()) {
-			jAddin.setDominoStatistic(this.userAddinName, statsName, text);
+			gJAddinMain.setDominoStatistic(gUserAddinName, statsName, text);
 		}
 	}
 
@@ -963,9 +964,8 @@ public abstract class JAddinThread extends NotesThread {
 	 * @param	waitTime	Wait time in milliseconds
 	 */
 	public final void waitMilliSeconds(long waitTime) {
-		
 		if (isJAddinAlive()) {
-			jAddin.waitMilliSeconds(waitTime);
+			gJAddinMain.waitMilliSeconds(waitTime);
 		}
 	}
 }
