@@ -49,9 +49,9 @@ The user code runs within a subclass of JAddinThread and handles all application
 | **Method**         | **Required** | **Description**                                       |
 | ------------------ | ------------ | ----------------------------------------------------- |
 | addinStart()       | Yes          | Main entry point of the application code              |
-| addinInterrupted() | No           | Returns true if main thread issued Thread.interrupt() |
-| addinCommand()     | No           | Called for any console command entered                |
 | addinStop()        | Yes          | Called before termination                             |
+| addinInterrupted() | No           | Returns true if main thread issued Thread.interrupt() |
 | addinNextHour()    | No           | Called at each new hour                               |
 | addinNextDay()     | No           | Called at each new day                                |
+| addinCommand()     | No           | Called for any console command entered                |
 
