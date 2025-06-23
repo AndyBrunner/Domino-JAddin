@@ -38,21 +38,15 @@ The open-source JAddin framework serves as a lightweight and user-friendly layer
 public class HelloWorld extends JAddinThread {
 
 	// Declarations
-	boolean terminateThread = false;
+	boolean mustTerminate = false;
 	
 	// This is the main entry point. When this method returns, the add-in terminates.
 	public void addinStart() {
 		
-		logMessage("Started with parameter: " + getAddinParameters());
-
-		try {
-			logMessage("Running on " + dbGetSession().getNotesVersion());
-		} catch (Exception e) {
-			logMessage("Unable to get Domino version: " + e.getMessage());
-		}
+		logMessage("Started");
 		
-		// Stay in main loop until termination signal set by addinStop()
-		while (!terminateThread) {
+		// Stay in main loop until main thread JAddin signals termination by calling addinStop() or issued Thread.interrupt()
+		while (!addinInterrupted() && !mustTerminate) {
 			logMessage("User code is executing...");
 			waitMilliSeconds(5000L);
 		}
@@ -60,20 +54,18 @@ public class HelloWorld extends JAddinThread {
 		logMessage("Terminated");
 	}
 
-	// This method is called by the JAddin framework when the command 'Quit' or 'Exit' is entered or during
+	// This method is called by the JAddin main thread when the console command 'Quit' or 'Exit' is entered or during
 	// Domino server shutdown. Here you must signal the addinStart() method to terminate itself and to perform any cleanup.
 	public void addinStop() {
-		
 		logMessage("Termination in progress");
-		
-		// Signal addinStart method to terminate thread
-		terminateThread = true;
+		mustTerminate = true;
 	}
 	
-	// This method is called by the JAddin framework for any console command entered.
+	// This method is called by the JAddin main thread for any console command entered. It should return quickly to
+	// avoid blocking the Domino message queue.
 	@Override
 	public void addinCommand(String command) {
-		logMessage("You have entered the command: " + command);
+		logMessage("Command entered: " + command);
 	}
 }
 ```
@@ -82,17 +74,18 @@ public class HelloWorld extends JAddinThread {
 
 ```
 > Load RunJava JAddin HelloWorld
-16.06.2025 16:19:13   JVM: Java Virtual Machine initialized.
-16.06.2025 16:19:13   RunJava: Started JAddin Java task.
-16.06.2025 16:19:13   HelloWorld: Started with parameter: null
-16.06.2025 16:19:13   HelloWorld: Running on Release 14.0FP4 March 10, 2025
-16.06.2025 16:19:13   HelloWorld: User code is executing...
-16.06.2025 16:19:18   HelloWorld: User code is executing...
-16.06.2025 16:19:23   HelloWorld: User code is executing...
-16.06.2025 16:19:28   HelloWorld: User code is executing...
+21.06.2025 14:01:26   JVM: Java Virtual Machine initialized.
+21.06.2025 14:01:26   RunJava: Started JAddin Java task.
+21.06.2025 14:01:26   HelloWorld: Started
+21.06.2025 14:01:26   HelloWorld: User code is executing...
+21.06.2025 14:01:31   HelloWorld: User code is executing...
+21.06.2025 14:01:36   HelloWorld: User code is executing...
+21.06.2025 14:01:41   HelloWorld: User code is executing...
 > Tell HelloWorld Quit
-16.06.2025 16:19:34   HelloWorld: Termination in progress
-16.06.2025 16:19:35   HelloWorld: Terminated
+21.06.2025 14:01:50   HelloWorld: Termination in progress
+21.06.2025 14:01:51   HelloWorld: Terminated
+21.06.2025 14:01:53   RunJava: Finalized JAddin Java task.
+21.06.2025 14:01:54   RunJava shutdown.
 ```
 
 ### **Prerequisites**
