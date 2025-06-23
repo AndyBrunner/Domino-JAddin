@@ -1,9 +1,9 @@
-# Java Utility Package (Open Source)
+# JAddin Java Framework for HCL Domino (Open Source)
 
-## A high-performance and user-friendly toolkit tailored for developing small to medium-sized back-end applications
+## Java Toolkit for developers writing HCL Domino Server Add-ins
 
 ---
 
-- Full documentation and downloads: [Website](https://java-util.k43.ch)
-- API documentation: [JavaDoc](https://andybrunner.github.io/Java-Utility-Package/ch/k43/util/package-summary.html)
+- Full documentation and downloads: [Website](https://jaddin.k43.ch)
+- API documentation: [JavaDoc](https://andybrunner.github.io/Domino-JAddin/api/package-summary.html)
 
