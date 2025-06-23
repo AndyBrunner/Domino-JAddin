@@ -1,0 +1,7 @@
+# Top-most EditorConfig file
+root = true
+
+# Apply to all files
+[*]
+indent_style = tab
+tab_width = 4

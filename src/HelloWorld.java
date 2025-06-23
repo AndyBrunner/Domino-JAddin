@@ -1,3 +1,6 @@
+/**
+ * Hello World Example
+ */
 public class HelloWorld extends JAddinThread {
 
 	// Declarations
